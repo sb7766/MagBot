@@ -1,19 +1,37 @@
-﻿{
+{
   "version": "1.0.0-*",
   "buildOptions": {
     "emitEntryPoint": true
   },
 
   "dependencies": {
-    "Microsoft.NETCore.App": {
-      "type": "platform",
-      "version": "1.0.1"
-    }
+    "Discord.Net.Commands": "1.0.0-rc-00595",
+    "Discord.Net.WebSocket": "1.0.0-rc-00595",
+    "Microsoft.NETCore.App": "1.1.0",
+    "Microsoft.EntityFrameworkCore.Sqlite": "1.1.0",
+    "Microsoft.EntityFrameworkCore.Design": {
+      "version": "1.1.0",
+      "type": "build"
+    },
+    "Microsoft.Extensions.Configuration": "1.1.0",
+    "Microsoft.Extensions.Configuration.Json": "1.1.0"
   },
 
   "frameworks": {
     "netcoreapp1.0": {
       "imports": "dnxcore50"
     }
+  },
+
+  "runtimes": {
+    "win10-x64": {}
+  },
+
+  "publishOptions": {
+    "include": [ "Resources" ]
+  },
+
+  "tools": {
+    "Microsoft.EntityFrameworkCore.Tools.DotNet" : "1.1.0-preview4"
   }
 }
