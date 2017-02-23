@@ -6,15 +6,15 @@ using Discord;
 using Discord.WebSocket;
 using System.IO;
 using Discord.Commands;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.Configuration.Json;
+using MagBot.DatabaseContexts;
+using Newtonsoft.Json.Linq;
 
 namespace MagBot
 {
     public class Program
     {
         // Invoke glorious async
-        public static void Main(string[] args) =>
+        public static void Main() =>
             new Program().Start().GetAwaiter().GetResult();
 
         private DiscordSocketClient client;
@@ -39,6 +39,7 @@ namespace MagBot
             await LogCustom("Installing commands...");
             var map = new DependencyMap();
             map.Add(client);
+            map.Add(this);
 
             handler = new CommandHandler();
             await handler.Install(map);
@@ -50,16 +51,38 @@ namespace MagBot
 
             await LogCustom("Configs loaded.");
 
+            await LogCustom("Initalizing guilds...");
+            client.GuildAvailable += (async (g) =>
+            {
+               using (var db = new GuildDataContext())
+               {
+                   var guild = await db.Guilds.FindAsync(g.Id);
+
+                   if (guild == null)
+                   {
+                       guild = new Guild
+                       {
+                           GuildId = g.Id
+                       };
+
+                       db.Guilds.Add(guild);
+
+                       await db.SaveChangesAsync();
+                   }
+               }
+            });
+            await LogCustom("Guilds initialized.");
+
             await Task.Delay(-1);
         }
 
-        private static Task Log(LogMessage msg)
+        private Task Log(LogMessage msg)
         {
             Console.WriteLine($"[{DateTime.Now}][{msg.Severity}][{msg.Source}] {msg.Message} {msg.Exception}");
             return Task.CompletedTask;
         }
 
-        public static Task LogCustom(string message, LogSeverity severity = LogSeverity.Info)
+        public Task LogCustom(string message, LogSeverity severity = LogSeverity.Info)
         {
             Log(new LogMessage(severity, "MagBot", message));
             return Task.CompletedTask;
@@ -67,19 +90,21 @@ namespace MagBot
 
         public async Task UpdateGame()
         {
-            string game = GetConfig.Result["currentGame"];
+            var json = JObject.Parse(File.ReadAllText("./Resources/BotConfig.json"));
+            string game = (string)json["currentGame"];
             await client.SetGameAsync(game);
         }
 
-        public Task<IConfigurationRoot> GetConfig = Task<IConfigurationRoot>.Factory.StartNew(() =>
+        public void Shutdown()
         {
-            var builder = new ConfigurationBuilder()
-                .SetBasePath($"{Directory.GetCurrentDirectory()}/Resources/")
-                .AddJsonFile("BotConfig.json");
+            client.DisconnectAsync();
+            Environment.Exit(0);
+        }
 
-            IConfigurationRoot config = builder.Build();
-
-            return config;
-        });
+        public void Restart()
+        {
+            client.DisconnectAsync();
+            Main();
+        }
     }
 }

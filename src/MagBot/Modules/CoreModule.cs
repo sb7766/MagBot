@@ -13,6 +13,15 @@ namespace MagBot.Modules
     [Name("Core")]
     public class CoreModule : ModuleBase 
     {
+        private CommandService commands;
+        private Program program;
+
+        public CoreModule(CommandService _commands, Program _program)
+        {
+            commands = _commands;
+            program = _program;
+        }
+
         [Command("info")]
         [Summary("Returns info about the bot.")]
         public async Task Info()
@@ -39,7 +48,7 @@ namespace MagBot.Modules
 
         [Command("help")]
         [Summary("Lists commands or displays information about specific commands.")]
-        public async Task Help([Summary("An optional command to get info for.")] string command = null)
+        public async Task Help(string command = null)
         {
             if (!string.IsNullOrWhiteSpace(command))
             {
@@ -62,7 +71,7 @@ namespace MagBot.Modules
                             {
                                 Name = "Aliases",
                                 Value = $"`{string.Join("`, `", cmd.Aliases)}`",
-                                IsInline = true
+                                IsInline = false
                             });
                         }
 
@@ -88,7 +97,7 @@ namespace MagBot.Modules
                         {
                             Name = "Usage",
                             Value = usage += '`',
-                            IsInline = true
+                            IsInline = false
                         });
                         embed.Build();
                         await ReplyAsync("", false, embed);
@@ -111,7 +120,7 @@ namespace MagBot.Modules
                 foreach (ModuleInfo mod in commands.Modules)
                 {
                     EmbedFieldBuilder modField = new EmbedFieldBuilder();
-                    modField.IsInline = true;
+                    modField.IsInline = false;
                     modField.Name = mod.Name;
                     var comList = mod.Commands.Where(c => c.CheckPreconditionsAsync(Context).Result.IsSuccess).Select(c => c.Name);
                     if (comList == null || comList.Count() == 0) continue;
@@ -131,15 +140,10 @@ namespace MagBot.Modules
         public async Task LeaveGuild()
         {
             await ReplyAsync($"Farewell, users of {Context.Guild.Name}!");
+            var application = await Context.Client.GetApplicationInfoAsync();
+            var ownerchannel = await Context.Client.GetDMChannelAsync(application.Owner.Id);
+            await ownerchannel.SendMessageAsync($"Mag-Bot has left server {Context.Guild.Name} ({Context.Guild.Id})");
             await Context.Guild.LeaveAsync();
-            await Program.LogCustom($"Mag-Bot has left server {Context.Guild.Name} ({Context.Guild.Id})");
-        }
-
-        private CommandService commands;
-
-        public CoreModule(CommandService _commands)
-        {
-            commands = _commands;
         }
     }
 }

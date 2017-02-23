@@ -13,12 +13,14 @@ namespace MagBot
     {
         private CommandService commands;
         private DiscordSocketClient client;
+        private Program program;
         private IDependencyMap map;
 
         public async Task Install(IDependencyMap _map)
         {
             // Put the service in the map
             client = _map.Get<DiscordSocketClient>();
+            program = _map.Get<Program>();
             commands = new CommandService();
             _map.Add(commands);
             map = _map;
@@ -47,7 +49,7 @@ namespace MagBot
             if (!result.IsSuccess)
             {
                 await message.Channel.SendMessageAsync($"**Error:** {result.ErrorReason}");
-                await Program.LogCustom($"Command Error: {result.ErrorReason}", LogSeverity.Error);
+                await program.LogCustom($"Command Error: {result.ErrorReason}", LogSeverity.Error);
             }
         }
     }
