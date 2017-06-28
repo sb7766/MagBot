@@ -6,6 +6,7 @@ using Discord;
 using Discord.WebSocket;
 using Discord.Commands;
 using System.Reflection;
+using MagBot.Services;
 
 namespace MagBot
 {
@@ -14,6 +15,7 @@ namespace MagBot
         private CommandService commands;
         private DiscordSocketClient client;
         private Program program;
+        private RaffleService raffles;
         private IDependencyMap map;
 
         public async Task Install(IDependencyMap _map)
@@ -22,7 +24,9 @@ namespace MagBot
             client = _map.Get<DiscordSocketClient>();
             program = _map.Get<Program>();
             commands = new CommandService();
+            raffles = new RaffleService();
             _map.Add(commands);
+            _map.Add(raffles);
             map = _map;
 
             await commands.AddModulesAsync(Assembly.GetEntryAssembly());
@@ -43,13 +47,35 @@ namespace MagBot
 
             // Create context
             var context = new CommandContext(client, message);
+
+            string commandLog = $"{context.User.Username} in ";
+            if(context.IsPrivate)
+            {
+                commandLog += "PRIVATE CHAT";
+            }
+            else
+            {
+                commandLog += context.Guild.Name;
+            }
+
+            commandLog += $": {context.Message}";
+
+            await LogHandler.Log(commandLog, LogSeverity.Info, "Command");
             // Execute command
             var result = await commands.ExecuteAsync(context, argPos, map);
 
             if (!result.IsSuccess)
             {
-                await message.Channel.SendMessageAsync($"**Error:** {result.ErrorReason}");
-                await program.LogCustom($"Command Error: {result.ErrorReason}", LogSeverity.Error);
+                var cmdString = context.Message.ToString().Substring(argPos);
+                if (result.ErrorReason == "Unknown command." && commands.Modules.Any(m => m.Aliases.Any(a => a == cmdString)))
+                {
+                    await message.Channel.SendMessageAsync($"**Error:** This command is a group only, and cannot be used on its own. Please use `m!help {cmdString}` for info about the group.");
+                }
+                else
+                {
+                    await message.Channel.SendMessageAsync($"**Error:** {result.ErrorReason}");
+                    await LogHandler.Log($"{result.ErrorReason}", LogSeverity.Error, "Command Error");
+                }
             }
         }
     }

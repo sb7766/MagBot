@@ -5,24 +5,23 @@
   },
 
   "dependencies": {
-    "Microsoft.EntityFrameworkCore.Sqlite": "1.1.0",
+    "Microsoft.EntityFrameworkCore.Sqlite": "1.1.1",
     "Microsoft.EntityFrameworkCore.Design": {
       "type": "build",
-      "version": "1.1.0"
+      "version": "1.1.1"
     },
-    "Microsoft.Extensions.Configuration": "1.1.0",
-    "Microsoft.Extensions.Configuration.Json": "1.1.0",
-    "Discord.Net.Commands": "1.0.0-rc-00604",
-    "Discord.Net.WebSocket": "1.0.0-rc-00604"
+    "Microsoft.Extensions.Configuration.Json": "1.1.1",
+    "Discord.Net.Commands": "1.0.0-rc-00614",
+    "Discord.Net.WebSocket": "1.0.0-rc-00614",
+    "Hangfire.Core":  "1.6.9",
+    "Hangfire.SqlServer": "1.6.9",
+    "Microsoft.Extensions.Configuration": "1.1.1",
+    "Microsoft.NETCore.App": "1.1.1"
     },
 
   "frameworks": {
     "netcoreapp1.1": {
       "dependencies": {
-        "Microsoft.NETCore.App": {
-          "type": "platform",
-          "version": "1.1.0"
-        }
       },
       "imports": "dnxcore50"
     }
@@ -37,6 +36,6 @@
   },
 
   "tools": {
-    "Microsoft.EntityFrameworkCore.Tools.DotNet": "1.1.0-preview4"
+    "Microsoft.EntityFrameworkCore.Tools.DotNet": "1.1.0-preview4-final"
   }
 }

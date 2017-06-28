@@ -22,7 +22,7 @@ namespace MagBot.Modules
 
         [Command("setgame")]
         [Summary("Set's the bot's game.")]
-        public async Task SetGame(string game)
+        public async Task SetGame([Remainder] string game)
         {
             var json = JObject.Parse(File.ReadAllText("./Resources/BotConfig.json"));
             json["currentGame"] = game;
@@ -37,14 +37,6 @@ namespace MagBot.Modules
         {
             await ReplyAsync("Shutting down...");
             program.Shutdown();
-        }
-
-        [Command("restart")]
-        [Summary("Restarts the bot.")]
-        public async Task Restart()
-        {
-            await ReplyAsync("Restarting...");
-            program.Restart();
         }
     }
 }

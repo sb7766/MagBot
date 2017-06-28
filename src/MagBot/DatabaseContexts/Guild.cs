@@ -10,5 +10,6 @@ namespace MagBot.DatabaseContexts
         public ulong GuildId { get; set; }
 
         public List<TagList> TagLists { get; set; }
+        public List<Raffle> Raffles { get; set; }
     }
 }

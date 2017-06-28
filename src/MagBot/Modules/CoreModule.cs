@@ -37,7 +37,7 @@ namespace MagBot.Modules
                 $"{Format.Bold("Stats")}\n" +
                 $"- Heap Size: {GetHeapSize()} MB\n" +
                 $"- Guilds: {(Context.Client as DiscordSocketClient).Guilds.Count}\n" +
-                $"- Channels: {(Context.Client as DiscordSocketClient).Guilds.Sum(g => g.Channels.Count)}" +
+                $"- Channels: {(Context.Client as DiscordSocketClient).Guilds.Sum(g => g.Channels.Count)}\n" +
                 $"- Users: {(Context.Client as DiscordSocketClient).Guilds.Sum(g => g.Users.Count)}"
             );
         }
@@ -48,22 +48,30 @@ namespace MagBot.Modules
 
         [Command("help")]
         [Summary("Lists commands or displays information about specific commands.")]
-        public async Task Help(string command = null)
+        public async Task Help([Remainder] string command)
         {
-            if (!string.IsNullOrWhiteSpace(command))
+            var cmd = commands.Commands.FirstOrDefault(c => c.Aliases.Any(a => a == command));
+            var mod = commands.Modules.FirstOrDefault(m => m.Aliases.Any(a => a == command));
+            var cmdResult = new PreconditionResult();
+            var modResult = new PreconditionResult();
+
+            if (cmd != null || mod != null)
             {
-                var cmd = commands.Commands.FirstOrDefault(c => c.Aliases.Any(a => a == command.ToLower()));
+                EmbedBuilder embed = new EmbedBuilder
+                {
+                    Color = new Color(50, 200, 50)
+                };
+
                 if (cmd != null)
                 {
-                    var result = await cmd?.CheckPreconditionsAsync(Context);
-                    if (result.IsSuccess)
+                    cmdResult = await cmd?.CheckPreconditionsAsync(Context);
+                    if (cmdResult.IsSuccess)
                     {
-                        EmbedBuilder embed = new EmbedBuilder
+                        embed.AddField(new EmbedFieldBuilder
                         {
-                            Color = new Color(0, 200, 0),
-                            Title = cmd.Name,
-                            Description = cmd.Summary
-                        };
+                            Name = cmd.Aliases.First(),
+                            Value = cmd.Summary
+                        });
 
                         if (cmd.Aliases.Count > 1)
                         {
@@ -75,15 +83,19 @@ namespace MagBot.Modules
                             });
                         }
 
-                        string usage = $"`{command.ToLower()}";
+                        string usage = $"`{command}";
                         if (cmd.Parameters.Count > 0)
                         {
                             var cmdNames = new List<string>();
-                            foreach(var param in cmd.Parameters)
+                            foreach (var param in cmd.Parameters)
                             {
-                                if (param.IsOptional || param.IsMultiple)
+                                if (param.IsOptional)
                                 {
                                     cmdNames.Add($"[{param.Name}]");
+                                }
+                                else if (param.IsMultiple || param.IsRemainder)
+                                {
+                                    cmdNames.Add($"<-{param.Name}->");
                                 }
                                 else
                                 {
@@ -93,44 +105,98 @@ namespace MagBot.Modules
 
                             usage += $" {string.Join(" ", cmdNames)}";
                         }
+
                         embed.AddField(new EmbedFieldBuilder
                         {
                             Name = "Usage",
                             Value = usage += '`',
                             IsInline = false
                         });
-                        embed.Build();
-                        await ReplyAsync("", false, embed);
                     }
-                    else if (!result.IsSuccess)
+                }
+
+                if (mod != null)
+                {
+                    modResult = await mod?.CheckPreconditionsAsync(Context);
+                    if (modResult.IsSuccess)
                     {
-                        await ReplyAsync("You do not have permission to access this command.");
+                        if (cmd == null)
+                        {
+                            embed.AddField(new EmbedFieldBuilder
+                            {
+                                Name = mod.Aliases.First(),
+                                Value = "This command is a group only. Sub-Commands are listed below.",
+                                IsInline = false
+                            });
+                        }
+                        List<string> comList = mod.Commands.Where(c => c.CheckPreconditionsAsync(Context).Result.IsSuccess && c.Name != "").Select(c => c.Name).ToList();
+                        foreach (var subMod in mod.Submodules)
+                        {
+                            comList.Add($"{subMod.Name.ToLower()}*");
+                        }
+                        comList = comList.Distinct().ToList();
+                        string coms = $"`{string.Join("`, `", comList)}`";
+                        embed.AddField(new EmbedFieldBuilder
+                        {
+                            Name = "Sub-Commands",
+                            Value = coms,
+                            IsInline = false
+                        });
                     }
-                    else await ReplyAsync("Invalid command.");
                 }
-                else await ReplyAsync("Invalid command.");
-            }
-            else
-            {
-                EmbedBuilder embed = new EmbedBuilder
+
+                if(!cmdResult.IsSuccess && !modResult.IsSuccess)
                 {
-                    Color = new Color(0, 200, 0),
-                    Description = "Here are all the commands you can use:"
-                };
-                foreach (ModuleInfo mod in commands.Modules)
-                {
-                    EmbedFieldBuilder modField = new EmbedFieldBuilder();
-                    modField.IsInline = false;
-                    modField.Name = mod.Name;
-                    var comList = mod.Commands.Where(c => c.CheckPreconditionsAsync(Context).Result.IsSuccess).Select(c => c.Name);
-                    if (comList == null || comList.Count() == 0) continue;
-                    string coms = $"`{string.Join("`, `", comList)}`";
-                    modField.Value = coms;
-                    embed.AddField(modField);
+                    throw new Exception("You do not have the permission to access that command or group.");
                 }
+
                 embed.Build();
                 await ReplyAsync("", false, embed);
             }
+            else
+            {
+                throw new Exception("Invalid command.");
+            }
+            
+
+            
+        }
+            
+
+        [Command("help")]
+        public async Task Help()
+        {
+            EmbedBuilder embed = new EmbedBuilder
+            {
+                Color = new Color(50, 200, 50),
+                Description = "Here is a list of available commands. A \"*\" indicates a command group."
+            };
+
+            foreach (ModuleInfo mod in commands.Modules.Where(m => !m.IsSubmodule))
+            {
+                EmbedFieldBuilder modField = new EmbedFieldBuilder();
+                modField.IsInline = false;
+                string name = mod.Name;
+                modField.Name = name;
+                var comList = new List<string>();
+                if (!string.IsNullOrWhiteSpace(mod.Aliases.First()))
+                    comList.Add($"{mod.Name.ToLower()}*");
+                else
+                {
+                    comList.AddRange(mod.Commands.Where(c => c.CheckPreconditionsAsync(Context).Result.IsSuccess).Select(c => c.Aliases.First()).ToList());
+                    foreach (var subMod in mod.Submodules)
+                    {
+                        comList.Add($"{subMod.Name.ToLower()}*");
+                    }
+                }
+                if (comList == null || comList.Count() == 0) continue;
+                comList = comList.Distinct().ToList();
+                string coms = $"`{string.Join("`, `", comList)}`";
+                modField.Value = coms;
+                embed.AddField(modField);
+            }
+            embed.Build();
+            await ReplyAsync("", false, embed);
         }
 
         [Command("leaveguild")]

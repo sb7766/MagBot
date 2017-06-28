@@ -244,3 +244,7 @@ ModelManifest.xml
 # FAKE - F# Make
 .fake/
 /src/MagBot/Resources/token.txt
+
+
+# Publish Profiles
+/src/MagBot/Properties/PublishProfiles/*
