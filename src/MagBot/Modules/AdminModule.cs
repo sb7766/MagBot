@@ -28,7 +28,7 @@ namespace MagBot.Modules
         [Summary("Set's the bot's game.")]
         public async Task SetGame([Remainder] string game)
         {
-            
+            _config["currentGame"] = game;
             await _configService.UpdateGame();
             await ReplyAsync("Game updated!");
         }

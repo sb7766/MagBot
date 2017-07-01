@@ -88,7 +88,7 @@ namespace MagBot
         {
             return new ConfigurationBuilder()
                 .SetBasePath(Directory.GetCurrentDirectory())
-                .AddJsonFile("./Resources/BotConfig.json")
+                .AddJsonFile("BotConfig.json")
                 .Build();
         }
     }

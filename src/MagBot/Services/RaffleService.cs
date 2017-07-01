@@ -140,7 +140,7 @@ namespace MagBot.Services
                 await db.SaveChangesAsync();
             }
 
-            await context.Channel.SendMessageAsync($"Raffle created for {context.User.Mention}. To start the raffle use `m!raffle start {raffle.RaffleId}`. You can configure additional settings with the sub-commands of 'm!raffle config'. If you do not start the raffle within 15 minutes, it will be cancelled.");
+            await context.Channel.SendMessageAsync($"Raffle created for {context.User.Mention} with ID `{raffle.RaffleId}`. To start the raffle use `m!raffle start {raffle.RaffleId}`. You can configure additional settings with the sub-commands of 'm!raffle config'. If you do not start the raffle within 15 minutes, it will be cancelled.");
         }
 
         // Parse the length of a raffle based on a string
