@@ -8,7 +8,9 @@ using System.IO;
 using Discord.Commands;
 using MagBot.DatabaseContexts;
 using Newtonsoft.Json.Linq;
-using Hangfire;
+using Microsoft.Extensions.DependencyInjection;
+using MagBot.Services;
+using Microsoft.Extensions.Configuration;
 
 namespace MagBot
 {
@@ -18,47 +20,31 @@ namespace MagBot
         public static void Main() =>
             new Program().Start().GetAwaiter().GetResult();
 
-        private DiscordSocketClient client;
-        private CommandHandler handler;
+        private DiscordSocketClient _client;
+        private IConfiguration _config;
 
         public async Task Start()
         {
             // Define client
-            await LogHandler.Log("Starting client...");
-            client = new DiscordSocketClient(new DiscordSocketConfig { LogLevel = LogSeverity.Info });
+            _client = new DiscordSocketClient();
+            _config = BuildConfig();
 
-            client.Log += LogHandler.Log;
+            var services = ConfigureServices();
+            services.GetRequiredService<LogService>();
+            await services.GetRequiredService<CommandHandlerService>().InitializeAsync(services);
 
-            var token = File.ReadAllText("Resources/token.txt");
+            await _client.LoginAsync(TokenType.Bot, _config["token"]);
+            await _client.StartAsync();
 
-            // Login and connect
-            await LogHandler.Log("Connecting to Discord...");
-            await client.LoginAsync(TokenType.Bot, token);
-            await client.StartAsync();
+            services.GetRequiredService<RaffleService>().Init();
 
-            await LogHandler.Log("Installing commands...");
-            var map = new DependencyMap();
-            map.Add(client);
-            map.Add(this);
-
-            handler = new CommandHandler();
-            await handler.Install(map);
-
-            await LogHandler.Log("Commands installed!");
-
-            await LogHandler.Log("Initializing Hangfire...");
-
-            GlobalConfiguration.Configuration
-                .UseSqlServerStorage(@"Server=(LocalDb)\mssqllocaldb; Database=Hangfire;");
-
-            client.Connected += (async () =>
+            _client.Connected += (async () =>
             {
-                await UpdateGame();
+                await services.GetRequiredService<ClientConfigService>().UpdateGame();
             });
             
-            client.GuildAvailable += (async (g) =>
+            _client.GuildAvailable += (async (g) =>
             {
-                await LogHandler.Log($"Guild Available: {g.Name}");
                 using (var db = new GuildDataContext())
                 {
                     var guild = await db.Guilds.FindAsync(g.Id);
@@ -80,20 +66,30 @@ namespace MagBot
             await Task.Delay(-1);
         }
 
-        public async Task UpdateGame()
+        private IServiceProvider ConfigureServices()
         {
-            var json = JObject.Parse(File.ReadAllText("./Resources/BotConfig.json"));
-            string game = (string)json["currentGame"];
-            await client.SetGameAsync(game);
-            await LogHandler.Log($"Game set to: {game}");
+            return new ServiceCollection()
+                // Base
+                .AddSingleton(_client)
+                .AddSingleton<CommandService>()
+                .AddSingleton<CommandHandlerService>()
+                // Raffles
+                .AddSingleton<RaffleService>()
+                // Logging
+                .AddLogging()
+                .AddSingleton<LogService>()
+                // Extra
+                .AddSingleton(_config)
+                .AddSingleton<ClientConfigService>()
+                .BuildServiceProvider();
         }
 
-        public async void Shutdown()
+        private IConfiguration BuildConfig()
         {
-            await client.SetStatusAsync(UserStatus.Offline);
-            await client.StopAsync();
-            await client.LogoutAsync();
-            Environment.Exit(0);
+            return new ConfigurationBuilder()
+                .SetBasePath(Directory.GetCurrentDirectory())
+                .AddJsonFile("./Resources/BotConfig.json")
+                .Build();
         }
     }
 }

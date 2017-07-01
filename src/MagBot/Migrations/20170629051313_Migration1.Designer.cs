@@ -8,13 +8,13 @@ using MagBot.DatabaseContexts;
 namespace MagBot.Migrations
 {
     [DbContext(typeof(GuildDataContext))]
-    [Migration("20170310043144_Migration2")]
-    partial class Migration2
+    [Migration("20170629051313_Migration1")]
+    partial class Migration1
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
             modelBuilder
-                .HasAnnotation("ProductVersion", "1.1.0-rtm-22752");
+                .HasAnnotation("ProductVersion", "1.1.1");
 
             modelBuilder.Entity("MagBot.DatabaseContexts.BlacklistedRaffleUser", b =>
                 {
@@ -47,15 +47,17 @@ namespace MagBot.Migrations
                     b.Property<int>("RaffleId")
                         .ValueGeneratedOnAdd();
 
+                    b.Property<ulong>("Channel");
+
+                    b.Property<DateTime>("CreatedAt");
+
                     b.Property<ulong>("GuildId");
 
-                    b.Property<int>("HangfireId");
+                    b.Property<ulong>("Owner");
 
-                    b.Property<int>("LocalId");
+                    b.Property<bool>("Started");
 
-                    b.Property<DateTime>("TimeCreated");
-
-                    b.Property<DateTime>("TimeStarted");
+                    b.Property<DateTime>("StartedAt");
 
                     b.HasKey("RaffleId");
 

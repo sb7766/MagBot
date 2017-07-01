@@ -4,27 +4,60 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace MagBot.Migrations
 {
-    public partial class Migration2 : Migration
+    public partial class Migration1 : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.CreateTable(
+                name: "Guilds",
+                columns: table => new
+                {
+                    GuildId = table.Column<ulong>(nullable: false)
+                        .Annotation("Sqlite:Autoincrement", true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Guilds", x => x.GuildId);
+                });
+
             migrationBuilder.CreateTable(
                 name: "Raffle",
                 columns: table => new
                 {
                     RaffleId = table.Column<int>(nullable: false)
                         .Annotation("Sqlite:Autoincrement", true),
+                    Channel = table.Column<ulong>(nullable: false),
+                    CreatedAt = table.Column<DateTime>(nullable: false),
                     GuildId = table.Column<ulong>(nullable: false),
-                    HangfireId = table.Column<int>(nullable: false),
-                    LocalId = table.Column<int>(nullable: false),
-                    TimeCreated = table.Column<DateTime>(nullable: false),
-                    TimeStarted = table.Column<DateTime>(nullable: false)
+                    Owner = table.Column<ulong>(nullable: false),
+                    Started = table.Column<bool>(nullable: false),
+                    StartedAt = table.Column<DateTime>(nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Raffle", x => x.RaffleId);
                     table.ForeignKey(
                         name: "FK_Raffle_Guilds_GuildId",
+                        column: x => x.GuildId,
+                        principalTable: "Guilds",
+                        principalColumn: "GuildId",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "TagList",
+                columns: table => new
+                {
+                    Id = table.Column<int>(nullable: false)
+                        .Annotation("Sqlite:Autoincrement", true),
+                    GuildId = table.Column<ulong>(nullable: false),
+                    Keyword = table.Column<string>(nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_TagList", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_TagList_Guilds_GuildId",
                         column: x => x.GuildId,
                         principalTable: "Guilds",
                         principalColumn: "GuildId",
@@ -75,6 +108,27 @@ namespace MagBot.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "Tag",
+                columns: table => new
+                {
+                    Id = table.Column<int>(nullable: false)
+                        .Annotation("Sqlite:Autoincrement", true),
+                    TagListId = table.Column<string>(nullable: true),
+                    TagListId1 = table.Column<int>(nullable: true),
+                    TagString = table.Column<string>(nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Tag", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Tag_TagList_TagListId1",
+                        column: x => x.TagListId1,
+                        principalTable: "TagList",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "BlacklistedRaffleUser",
                 columns: table => new
                 {
@@ -114,6 +168,16 @@ namespace MagBot.Migrations
                 name: "IX_RaffleEntry_RaffleId",
                 table: "RaffleEntry",
                 column: "RaffleId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Tag_TagListId1",
+                table: "Tag",
+                column: "TagListId1");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_TagList_GuildId",
+                table: "TagList",
+                column: "GuildId");
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)
@@ -125,10 +189,19 @@ namespace MagBot.Migrations
                 name: "RaffleEntry");
 
             migrationBuilder.DropTable(
+                name: "Tag");
+
+            migrationBuilder.DropTable(
                 name: "RaffleConfig");
 
             migrationBuilder.DropTable(
+                name: "TagList");
+
+            migrationBuilder.DropTable(
                 name: "Raffle");
+
+            migrationBuilder.DropTable(
+                name: "Guilds");
         }
     }
 }

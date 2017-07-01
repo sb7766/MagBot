@@ -9,14 +9,11 @@ namespace MagBot
 {
     public static class Extensions
     {
-        public static async Task<PreconditionResult> CheckPreconditionsAsync(this ModuleInfo mod, ICommandContext context, IDependencyMap map = null)
+        public static async Task<PreconditionResult> CheckPreconditionsAsync(this ModuleInfo mod, ICommandContext context, IServiceProvider provider)
         {
-            if (map == null)
-                map = DependencyMap.Empty;
-
             foreach (PreconditionAttribute precondition in mod.Preconditions)
             {
-                var result = await precondition.CheckPermissions(context, mod.Commands.FirstOrDefault(), map).ConfigureAwait(false);
+                var result = await precondition.CheckPermissions(context, mod.Commands.FirstOrDefault(), provider).ConfigureAwait(false);
                 if (!result.IsSuccess)
                     return result;
             }

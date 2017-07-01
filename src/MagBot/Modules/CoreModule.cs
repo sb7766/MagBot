@@ -13,13 +13,15 @@ namespace MagBot.Modules
     [Name("Core")]
     public class CoreModule : ModuleBase 
     {
-        private CommandService commands;
-        private Program program;
+        private readonly CommandService _commands;
+        private readonly IServiceProvider _provider;
+        //private readonly Program program;
 
-        public CoreModule(CommandService _commands, Program _program)
+        public CoreModule(CommandService commands, IServiceProvider provider)
         {
-            commands = _commands;
-            program = _program;
+            _commands = commands;
+            _provider = provider;
+            //program = _program;
         }
 
         [Command("info")]
@@ -50,8 +52,8 @@ namespace MagBot.Modules
         [Summary("Lists commands or displays information about specific commands.")]
         public async Task Help([Remainder] string command)
         {
-            var cmd = commands.Commands.FirstOrDefault(c => c.Aliases.Any(a => a == command));
-            var mod = commands.Modules.FirstOrDefault(m => m.Aliases.Any(a => a == command));
+            var cmd = _commands.Commands.FirstOrDefault(c => c.Aliases.Any(a => a == command));
+            var mod = _commands.Modules.FirstOrDefault(m => m.Aliases.Any(a => a == command));
             var cmdResult = new PreconditionResult();
             var modResult = new PreconditionResult();
 
@@ -117,7 +119,7 @@ namespace MagBot.Modules
 
                 if (mod != null)
                 {
-                    modResult = await mod?.CheckPreconditionsAsync(Context);
+                    modResult = await mod?.CheckPreconditionsAsync(Context, _provider);
                     if (modResult.IsSuccess)
                     {
                         if (cmd == null)
@@ -172,7 +174,7 @@ namespace MagBot.Modules
                 Description = "Here is a list of available commands. A \"*\" indicates a command group."
             };
 
-            foreach (ModuleInfo mod in commands.Modules.Where(m => !m.IsSubmodule))
+            foreach (ModuleInfo mod in _commands.Modules.Where(m => !m.IsSubmodule))
             {
                 EmbedFieldBuilder modField = new EmbedFieldBuilder();
                 modField.IsInline = false;

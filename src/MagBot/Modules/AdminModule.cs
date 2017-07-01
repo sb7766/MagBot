@@ -6,6 +6,8 @@ using Discord.Commands;
 using MagBot;
 using Newtonsoft.Json.Linq;
 using System.IO;
+using Microsoft.Extensions.Configuration;
+using MagBot.Services;
 
 namespace MagBot.Modules
 {
@@ -13,21 +15,21 @@ namespace MagBot.Modules
     [RequireOwner]
     public class AdminModule : ModuleBase
     {
-        private Program program;
+        private readonly IConfiguration _config;
+        private readonly ClientConfigService _configService;
 
-        public AdminModule(Program _program)
+        public AdminModule(IConfiguration config, ClientConfigService configService)
         {
-            program = _program;
+            _config = config;
+            _configService = configService;
         }
 
         [Command("setgame")]
         [Summary("Set's the bot's game.")]
         public async Task SetGame([Remainder] string game)
         {
-            var json = JObject.Parse(File.ReadAllText("./Resources/BotConfig.json"));
-            json["currentGame"] = game;
-            File.WriteAllText("./Resources/BotConfig.json", json.ToString());
-            await program.UpdateGame();
+            
+            await _configService.UpdateGame();
             await ReplyAsync("Game updated!");
         }
 
@@ -36,7 +38,7 @@ namespace MagBot.Modules
         public async Task Shutdown()
         {
             await ReplyAsync("Shutting down...");
-            program.Shutdown();
+            _configService.Shutdown();
         }
     }
 }

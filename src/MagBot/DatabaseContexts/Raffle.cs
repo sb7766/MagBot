@@ -8,12 +8,12 @@ namespace MagBot.DatabaseContexts
     public class Raffle
     {
         public int RaffleId { get; set; }
-
-        public int LocalId { get; set; }
-        public int HangfireId { get; set; }
-        public long RaffleOwner { get; set; }
-        public DateTime TimeCreated { get; set; }
-        public DateTime TimeStarted { get; set; }
+        
+        public bool Started { get; set; }
+        public ulong Owner { get; set; }
+        public ulong Channel { get; set; }
+        public DateTime CreatedAt { get; set; }
+        public DateTime StartedAt { get; set; }
         public RaffleConfig Config { get; set; }
         public List<RaffleEntry> RaffleEntries { get; set; }
 

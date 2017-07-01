@@ -46,17 +46,17 @@ namespace MagBot.Migrations
                     b.Property<int>("RaffleId")
                         .ValueGeneratedOnAdd();
 
+                    b.Property<ulong>("Channel");
+
+                    b.Property<DateTime>("CreatedAt");
+
                     b.Property<ulong>("GuildId");
 
-                    b.Property<int>("HangfireId");
+                    b.Property<ulong>("Owner");
 
-                    b.Property<int>("LocalId");
+                    b.Property<bool>("Started");
 
-                    b.Property<long>("RaffleOwner");
-
-                    b.Property<DateTime>("TimeCreated");
-
-                    b.Property<DateTime>("TimeStarted");
+                    b.Property<DateTime>("StartedAt");
 
                     b.HasKey("RaffleId");
 
