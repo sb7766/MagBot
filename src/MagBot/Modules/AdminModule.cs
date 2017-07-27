@@ -19,20 +19,19 @@ namespace MagBot.Modules
     public class AdminModule : ModuleBase
     {
         private readonly ClientConfigService _configService;
+        private readonly IConfiguration _config;
 
-        public AdminModule(ClientConfigService configService)
+        public AdminModule(ClientConfigService configService, IConfiguration config)
         {
             _configService = configService;
+            _config = config;
         }
 
         [Command("setgame")]
         [Summary("Sets the bot's game.")]
         public async Task SetGame([Remainder] string game)
         {
-            string path = Directory.GetCurrentDirectory() + "/BotConfig.json";
-            dynamic jsonObj = JsonConvert.DeserializeObject(File.ReadAllText(path));
-            jsonObj["currentGame"] = game;
-            File.WriteAllText(path, JsonConvert.SerializeObject(jsonObj, Formatting.Indented));
+            _config["currentGame"] = game;
             await _configService.UpdateGame();
             await ReplyAsync("Game updated!");
         }

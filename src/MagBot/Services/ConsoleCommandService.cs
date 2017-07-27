@@ -17,7 +17,7 @@ namespace MagBot.Services
             _clientConfig = clientConfig;
         }
 
-        public async Task Init()
+        public async void Init()
         {
             while(true)
             {

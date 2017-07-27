@@ -11,6 +11,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
+using System.Threading;
 
 namespace MagBot
 {
@@ -40,7 +41,7 @@ namespace MagBot
             await _client.StartAsync();
 
             services.GetRequiredService<RaffleService>().Init();
-            await services.GetRequiredService<ConsoleCommandService>().Init();
+            new Thread(services.GetRequiredService<ConsoleCommandService>().Init).Start();
 
             _client.Connected += (async () =>
             {
@@ -65,8 +66,6 @@ namespace MagBot
 
                 await db.SaveChangesAsync();
             });
-
-            
 
             await Task.Delay(-1);
         }
