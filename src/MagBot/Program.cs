@@ -1,16 +1,16 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 using Discord;
 using Discord.WebSocket;
 using System.IO;
 using Discord.Commands;
 using MagBot.DatabaseContexts;
-using Newtonsoft.Json.Linq;
 using Microsoft.Extensions.DependencyInjection;
 using MagBot.Services;
 using Microsoft.Extensions.Configuration;
+using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 
 namespace MagBot
 {
@@ -26,7 +26,10 @@ namespace MagBot
         public async Task Start()
         {
             // Define client
-            _client = new DiscordSocketClient();
+            _client = new DiscordSocketClient( new DiscordSocketConfig
+            {
+                
+            });
             _config = BuildConfig();
 
             var services = ConfigureServices();
@@ -37,6 +40,7 @@ namespace MagBot
             await _client.StartAsync();
 
             services.GetRequiredService<RaffleService>().Init();
+            await services.GetRequiredService<ConsoleCommandService>().Init();
 
             _client.Connected += (async () =>
             {
@@ -45,23 +49,24 @@ namespace MagBot
             
             _client.GuildAvailable += (async (g) =>
             {
-                using (var db = new GuildDataContext())
+                var db = services.GetRequiredService<GuildDataContext>();
+
+                var guild = await db.Guilds.FirstOrDefaultAsync(gu => gu.DiscordId == g.Id);
+
+                if (guild == null)
                 {
-                    var guild = await db.Guilds.FindAsync(g.Id);
-
-                    if (guild == null)
+                    guild = new Guild
                     {
-                        guild = new Guild
-                        {
-                            GuildId = g.Id
-                        };
+                        DiscordId = g.Id
+                    };
 
-                        db.Guilds.Add(guild);
-
-                        await db.SaveChangesAsync();
-                    }
+                    db.Guilds.Add(guild);
                 }
+
+                await db.SaveChangesAsync();
             });
+
+            
 
             await Task.Delay(-1);
         }
@@ -81,15 +86,34 @@ namespace MagBot
                 // Extra
                 .AddSingleton(_config)
                 .AddSingleton<ClientConfigService>()
+                .AddSingleton<ConsoleCommandService>()
+                .AddDbContext<GuildDataContext>(options => options.UseNpgsql(_config.GetConnectionString("Sunburst")))
                 .BuildServiceProvider();
         }
 
         private IConfiguration BuildConfig()
         {
-            return new ConfigurationBuilder()
-                .SetBasePath(Directory.GetCurrentDirectory())
-                .AddJsonFile("BotConfig.json")
+            if (Environment.GetEnvironmentVariable("SUNBURST_ENV") == "Development")
+            {
+                return new ConfigurationBuilder()
+                .SetBasePath(Path.Combine(AppContext.BaseDirectory, "Config/"))
+                .AddJsonFile("BotConfig.json", true, true)
+                .AddJsonFile("BotConfigDev.json", true, true)
+                // File not included in source control, includes connection strings and tokens
+                .AddJsonFile("DevSecrets.json", true, true)
                 .Build();
+            }
+            else if (Environment.GetEnvironmentVariable("SUNBURST_ENV") == "Release")
+            {
+                return new ConfigurationBuilder()
+                .SetBasePath(Path.Combine(AppContext.BaseDirectory, "Config/"))
+                .AddJsonFile("BotConfig.json", true, true)
+                .AddJsonFile("BotConfigRelease.json", true, true)
+                // File not included in source control, includes connection strings and tokens
+                .AddJsonFile("ReleaseSecrets.json", true, true)
+                .Build();
+            }
+            else throw new Exception("Invalid environment. Must be Development or Release.");
         }
     }
 }

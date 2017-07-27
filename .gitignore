@@ -248,5 +248,6 @@ ModelManifest.xml
 
 # Publish Profiles
 /src/MagBot/Properties/PublishProfiles/*
-/src/MagBot/GuildData.db
-/src/MagBot/BotConfig.json
+
+# Custom
+/src/MagBot/Config/*Secrets*

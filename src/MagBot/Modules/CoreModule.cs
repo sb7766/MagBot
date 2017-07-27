@@ -54,8 +54,8 @@ namespace MagBot.Modules
         {
             var cmd = _commands.Commands.FirstOrDefault(c => c.Aliases.Any(a => a == command));
             var mod = _commands.Modules.FirstOrDefault(m => m.Aliases.Any(a => a == command));
-            var cmdResult = new PreconditionResult();
-            var modResult = new PreconditionResult();
+            var cmdResult = PreconditionResult.FromError("");
+            var modResult = PreconditionResult.FromError("");
 
             if (cmd != null || mod != null)
             {

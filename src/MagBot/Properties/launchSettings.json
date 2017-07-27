@@ -1,0 +1,10 @@
+{
+  "profiles": {
+    "MagBot": {
+      "commandName": "Project",
+      "environmentVariables": {
+        "SUNBURST_ENV": "Development"
+      }
+    }
+  }
+}

@@ -8,13 +8,14 @@ using MagBot.DatabaseContexts;
 namespace MagBot.Migrations
 {
     [DbContext(typeof(GuildDataContext))]
-    [Migration("20170629051313_Migration1")]
+    [Migration("20170703051941_Migration1")]
     partial class Migration1
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
             modelBuilder
-                .HasAnnotation("ProductVersion", "1.1.1");
+                .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.SerialColumn)
+                .HasAnnotation("ProductVersion", "1.1.2");
 
             modelBuilder.Entity("MagBot.DatabaseContexts.BlacklistedRaffleUser", b =>
                 {
@@ -23,47 +24,41 @@ namespace MagBot.Migrations
 
                     b.Property<int>("RaffleConfigId");
 
-                    b.Property<ulong>("UserId");
-
                     b.HasKey("Id");
 
                     b.HasIndex("RaffleConfigId");
 
-                    b.ToTable("BlacklistedRaffleUser");
+                    b.ToTable("BlacklistedRaffleUsers");
                 });
 
             modelBuilder.Entity("MagBot.DatabaseContexts.Guild", b =>
                 {
-                    b.Property<ulong>("GuildId")
+                    b.Property<int>("Id")
                         .ValueGeneratedOnAdd();
 
-                    b.HasKey("GuildId");
+                    b.HasKey("Id");
 
                     b.ToTable("Guilds");
                 });
 
             modelBuilder.Entity("MagBot.DatabaseContexts.Raffle", b =>
                 {
-                    b.Property<int>("RaffleId")
+                    b.Property<int>("Id")
                         .ValueGeneratedOnAdd();
-
-                    b.Property<ulong>("Channel");
 
                     b.Property<DateTime>("CreatedAt");
 
-                    b.Property<ulong>("GuildId");
-
-                    b.Property<ulong>("Owner");
+                    b.Property<int>("GuildId");
 
                     b.Property<bool>("Started");
 
                     b.Property<DateTime>("StartedAt");
 
-                    b.HasKey("RaffleId");
+                    b.HasKey("Id");
 
                     b.HasIndex("GuildId");
 
-                    b.ToTable("Raffle");
+                    b.ToTable("Raffles");
                 });
 
             modelBuilder.Entity("MagBot.DatabaseContexts.RaffleConfig", b =>
@@ -77,8 +72,6 @@ namespace MagBot.Migrations
 
                     b.Property<int>("RaffleId");
 
-                    b.Property<ulong>("WhiteListedRole");
-
                     b.Property<int>("WinnerCount");
 
                     b.HasKey("RaffleConfigId");
@@ -86,7 +79,7 @@ namespace MagBot.Migrations
                     b.HasIndex("RaffleId")
                         .IsUnique();
 
-                    b.ToTable("RaffleConfig");
+                    b.ToTable("RaffleConfigs");
                 });
 
             modelBuilder.Entity("MagBot.DatabaseContexts.RaffleEntry", b =>
@@ -96,13 +89,11 @@ namespace MagBot.Migrations
 
                     b.Property<int>("RaffleId");
 
-                    b.Property<ulong>("UserId");
-
                     b.HasKey("Id");
 
                     b.HasIndex("RaffleId");
 
-                    b.ToTable("RaffleEntry");
+                    b.ToTable("RaffleEntries");
                 });
 
             modelBuilder.Entity("MagBot.DatabaseContexts.Tag", b =>
@@ -120,7 +111,7 @@ namespace MagBot.Migrations
 
                     b.HasIndex("TagListId1");
 
-                    b.ToTable("Tag");
+                    b.ToTable("Tags");
                 });
 
             modelBuilder.Entity("MagBot.DatabaseContexts.TagList", b =>
@@ -128,7 +119,7 @@ namespace MagBot.Migrations
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd();
 
-                    b.Property<ulong>("GuildId");
+                    b.Property<int>("GuildId");
 
                     b.Property<string>("Keyword");
 
@@ -136,7 +127,7 @@ namespace MagBot.Migrations
 
                     b.HasIndex("GuildId");
 
-                    b.ToTable("TagList");
+                    b.ToTable("TagLists");
                 });
 
             modelBuilder.Entity("MagBot.DatabaseContexts.BlacklistedRaffleUser", b =>

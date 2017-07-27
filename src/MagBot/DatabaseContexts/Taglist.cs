@@ -1,10 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Threading.Tasks;
 
 namespace MagBot.DatabaseContexts
 {
+    [Table("TagLists")]
     public class TagList
     {
         public int Id { get; set; }
@@ -12,7 +14,7 @@ namespace MagBot.DatabaseContexts
         public string Keyword { get; set; }
         public List<Tag> Tags { get; set; }
 
-        public ulong GuildId { get; set; }
+        public int GuildId { get; set; }
         public Guild Guild { get; set; }
     }
 }

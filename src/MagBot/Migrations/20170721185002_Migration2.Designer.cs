@@ -8,9 +8,10 @@ using MagBot.DatabaseContexts;
 namespace MagBot.Migrations
 {
     [DbContext(typeof(GuildDataContext))]
-    partial class GuildDataContextModelSnapshot : ModelSnapshot
+    [Migration("20170721185002_Migration2")]
+    partial class Migration2
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
             modelBuilder
                 .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.SerialColumn)

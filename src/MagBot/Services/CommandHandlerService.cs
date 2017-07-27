@@ -7,6 +7,7 @@ using Discord.WebSocket;
 using Discord.Commands;
 using System.Reflection;
 using MagBot.Services;
+using Microsoft.Extensions.Configuration;
 
 namespace MagBot.Services
 {
@@ -14,13 +15,15 @@ namespace MagBot.Services
     {
         private readonly CommandService _commands;
         private readonly DiscordSocketClient _discord;
+        private readonly IConfiguration _config;
         private IServiceProvider _provider;
 
-        public CommandHandlerService(IServiceProvider provider, DiscordSocketClient discord, CommandService commands)
+        public CommandHandlerService(IServiceProvider provider, DiscordSocketClient discord, CommandService commands, IConfiguration config)
         {
             _discord = discord;
             _commands = commands;
             _provider = provider;
+            _config = config;
 
             _discord.MessageReceived += MessageReceived;
         }
@@ -39,7 +42,7 @@ namespace MagBot.Services
             if (message.Source != MessageSource.User) return;
 
             int argPos = 0;
-            if (!message.HasStringPrefix("m!", ref argPos)) return;
+            if (!message.HasStringPrefix(_config["commandPrefix"], ref argPos)) return;
 
             var context = new SocketCommandContext(_discord, message);
             var result = await _commands.ExecuteAsync(context, argPos, _provider);

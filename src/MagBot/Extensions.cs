@@ -13,12 +13,15 @@ namespace MagBot
         {
             foreach (PreconditionAttribute precondition in mod.Preconditions)
             {
-                var result = await precondition.CheckPermissions(context, mod.Commands.FirstOrDefault(), provider).ConfigureAwait(false);
-                if (!result.IsSuccess)
-                    return result;
+                foreach (var cmd in mod.Commands)
+                {
+                    var result = await precondition.CheckPermissions(context, cmd, provider).ConfigureAwait(false);
+                    if (result.IsSuccess)
+                        return result;
+                }
             }
 
-            return PreconditionResult.FromSuccess();
+            return PreconditionResult.FromError("User has no permissions for commands in this module.");
         }
     }
 }

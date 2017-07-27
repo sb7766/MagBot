@@ -4,6 +4,10 @@ using Microsoft.Extensions.Logging;
 using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
+using MagBot.DatabaseContexts;
+using Microsoft.EntityFrameworkCore.Storage;
+using Microsoft.Extensions.Logging.Console;
+using Microsoft.Extensions.Configuration;
 
 namespace MagBot.Services
 {
@@ -11,18 +15,23 @@ namespace MagBot.Services
     {
         private readonly DiscordSocketClient _discord;
         private readonly CommandService _commands;
+        private readonly IConfiguration _config;
         private readonly ILoggerFactory _loggerFactory;
         private readonly ILogger _discordLogger;
         private readonly ILogger _commandsLogger;
+        private readonly ILogger _databaseLogger;
 
-        public LogService(DiscordSocketClient discord, CommandService commands, ILoggerFactory loggerFactory)
+        public LogService(DiscordSocketClient discord, CommandService commands, IConfiguration config, ILoggerFactory loggerFactory)
         {
             _discord = discord;
             _commands = commands;
+            _config = config;
 
             _loggerFactory = ConfigureLogging(loggerFactory);
             _discordLogger = _loggerFactory.CreateLogger("discord");
             _commandsLogger = _loggerFactory.CreateLogger("commands");
+            _databaseLogger = _loggerFactory.CreateLogger("database");
+
 
             _discord.Log += LogDiscord;
             _commands.Log += LogCommand;
@@ -30,7 +39,7 @@ namespace MagBot.Services
 
         private ILoggerFactory ConfigureLogging(ILoggerFactory factory)
         {
-            factory.AddConsole();
+            factory.AddConsole(_config.GetSection("Logging"));
             return factory;
         }
 
