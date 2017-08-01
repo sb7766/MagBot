@@ -188,7 +188,7 @@ namespace MagBot.Modules
         public async Task Roll(int max)
         {
             var rand = new Random();
-            int num = rand.Next(1, max);
+            int num = rand.Next(1, max+1);
             await ReplyAsync($"{Context.User.Mention} rolled a {num}!");
         }
 
@@ -196,7 +196,7 @@ namespace MagBot.Modules
         public async Task Roll(int min, int max)
         {
             var rand = new Random();
-            int num = rand.Next(min, max);
+            int num = rand.Next(min, max+1);
             await ReplyAsync($"{Context.User.Mention} rolled a {num}!");
         }
 
@@ -205,6 +205,43 @@ namespace MagBot.Modules
         {
             var roll = D20Roll.Parse(d20roll);
             await ReplyAsync($"Roll for {Context.User.Mention}: {roll.Roll()}");
+        }
+
+        [Command("choose")]
+        [Summary("Choose a random item from a list seperated by spaces or commas. " +
+            "You can also use 'user' to select a random user or a role name to select a random user with that role.")]
+        public async Task Choose([Remainder] string choices)
+        {
+            var rand = new Random();
+            string result = "I choose... ";
+            if (choices == "user")
+            {
+                var users = await Context.Guild.GetUsersAsync();
+                int num = rand.Next(0, users.Count);
+                result += users.ToList()[num].Mention;
+            }
+            else if (Context.Guild.Roles.Any(r => r.Name == choices))
+            {
+                var role = Context.Guild.Roles.FirstOrDefault(r => r.Name == choices);
+                var users = await Context.Guild.GetUsersAsync();
+                var roleUsers = users.Where(u => u.RoleIds.Contains(role.Id));
+
+                int num = rand.Next(0, roleUsers.Count());
+                result += roleUsers.ToList()[num].Mention;
+            }
+            else
+            {
+                List<string> choiceList = new List<string>();
+                if (choices.Contains(','))
+                    choiceList = choices.Split(',').ToList();
+                else
+                    choiceList = choices.Split(' ').ToList();
+
+                int num = rand.Next(0, choiceList.Count);
+                result += choiceList[num];
+            }
+
+            await ReplyAsync($"{result}!");
         }
     }
 
@@ -287,7 +324,7 @@ namespace MagBot.Modules
             List<int> rolls = new List<int>();
             for (int i = 0; i < DiceCount; i++)
             {
-                rolls.Add(rand.Next(1, DieNumber));
+                rolls.Add(rand.Next(1, DieNumber+1));
             }
 
             int total = rolls.Sum();
