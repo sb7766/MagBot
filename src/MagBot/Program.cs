@@ -112,7 +112,7 @@ namespace MagBot
                 .AddJsonFile("ReleaseSecrets.json", true, true)
                 .Build();
             }
-            else throw new Exception("Invalid environment. Must be Development or Release.");
+            else throw new Exception("Invalid environment. SUNBURST_ENV must be Development or Release.");
         }
     }
 }

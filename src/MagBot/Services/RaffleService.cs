@@ -135,7 +135,10 @@ namespace MagBot.Services
 
             await _sunburstdb.SaveChangesAsync();
 
-            await context.Channel.SendMessageAsync($"Raffle created for {context.User.Mention} with ID `{raffle.Id}`. To start the raffle use `m!raffle start {raffle.Id}`. You can configure additional settings with the sub-commands of 'm!raffle config'. If you do not start the raffle within 15 minutes, it will be cancelled.");
+            await context.Channel.SendMessageAsync($"Raffle created for {context.User.Mention} with ID `{raffle.Id}`. " +
+                $"To start the raffle use `m!raffle start {raffle.Id}`. " +
+                $"You can configure additional settings with the sub-commands of 'm!raffle config'. " +
+                $"If you do not start the raffle within 15 minutes, it will be cancelled.");
         }
 
         // Parse the length of a raffle based on a string
@@ -145,9 +148,8 @@ namespace MagBot.Services
 
             char last = length.LastOrDefault();
             length = length.TrimEnd(last);
-
-            double lengthNum;
-            double.TryParse(length, out lengthNum);
+            
+            double.TryParse(length, out double lengthNum);
 
             if (lengthNum.Equals(null))
             {
@@ -477,7 +479,8 @@ namespace MagBot.Services
 
             await _sunburstdb.SaveChangesAsync();
 
-            await context.Channel.SendMessageAsync($"{context.User.Mention} has started a raffle! Use `m!raffle enter {id}` to enter and `m!raffle info {id}` for more information about the raffle.");
+            await context.Channel.SendMessageAsync($"{context.User.Mention} has started a raffle! " +
+                $"Use `m!raffle enter {id}` to enter and `m!raffle info {id}` for more information about the raffle.");
         }
 
         // Allow the raffle owner to end a raffle before the end time

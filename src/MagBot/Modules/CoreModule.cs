@@ -15,13 +15,11 @@ namespace MagBot.Modules
     {
         private readonly CommandService _commands;
         private readonly IServiceProvider _provider;
-        //private readonly Program program;
 
         public CoreModule(CommandService commands, IServiceProvider provider)
         {
             _commands = commands;
             _provider = provider;
-            //program = _program;
         }
 
         [Command("info")]
@@ -31,7 +29,7 @@ namespace MagBot.Modules
             var application = await Context.Client.GetApplicationInfoAsync();
             await ReplyAsync(
                 $"{Format.Bold("Info")}\n" +
-                $"- Author: {application.Owner.Username} (ID {application.Owner.Id})\n" +
+                $"- Author: {application.Owner.Username}#{application.Owner.Discriminator} (ID {application.Owner.Id})\n" +
                 $"- Library: Discord.Net ({DiscordConfig.Version})\n" +
                 $"- Runtime: {RuntimeInformation.FrameworkDescription} {RuntimeInformation.OSArchitecture}\n" +
                 $"- Uptime: {GetUptime()}\n\n" +
@@ -69,6 +67,8 @@ namespace MagBot.Modules
                     cmdResult = await cmd?.CheckPreconditionsAsync(Context);
                     if (cmdResult.IsSuccess)
                     {
+                        var cmds = _commands.Commands.Where(cm => cm.Aliases.Any(al => al == command)).ToList();
+
                         embed.AddField(new EmbedFieldBuilder
                         {
                             Name = cmd.Aliases.First(),
@@ -85,33 +85,39 @@ namespace MagBot.Modules
                             });
                         }
 
-                        string usage = $"`{command}";
-                        if (cmd.Parameters.Count > 0)
+                        string usage = "";
+                        foreach (var usecmd in cmds)
                         {
-                            var cmdNames = new List<string>();
-                            foreach (var param in cmd.Parameters)
+                            usage += $"`{command}";
+                            if (usecmd.Parameters.Count > 0)
                             {
-                                if (param.IsOptional)
+                                var cmdNames = new List<string>();
+                                foreach (var param in usecmd.Parameters)
                                 {
-                                    cmdNames.Add($"[{param.Name}]");
+                                    if (param.IsOptional)
+                                    {
+                                        cmdNames.Add($"[{param.Name}]");
+                                    }
+                                    else if (param.IsMultiple || param.IsRemainder)
+                                    {
+                                        cmdNames.Add($"<-{param.Name}->");
+                                    }
+                                    else
+                                    {
+                                        cmdNames.Add($"<{param.Name}>");
+                                    }
                                 }
-                                else if (param.IsMultiple || param.IsRemainder)
-                                {
-                                    cmdNames.Add($"<-{param.Name}->");
-                                }
-                                else
-                                {
-                                    cmdNames.Add($"<{param.Name}>");
-                                }
-                            }
 
-                            usage += $" {string.Join(" ", cmdNames)}";
+                                usage += $" {string.Join(" ", cmdNames)}`\n";
+                            }
+                            else usage += "`\n";
                         }
+                        
 
                         embed.AddField(new EmbedFieldBuilder
                         {
                             Name = "Usage",
-                            Value = usage += '`',
+                            Value = usage,
                             IsInline = false
                         });
                     }

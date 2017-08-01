@@ -63,6 +63,7 @@ namespace MagBot.Modules
             {
                 c.Avatar = new Discord.Image(imgStream);
             });
+            await ReplyAsync("Avatar updated!");
         }
 
         [Command("shutdown")]

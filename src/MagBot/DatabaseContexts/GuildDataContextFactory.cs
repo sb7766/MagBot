@@ -26,7 +26,7 @@ namespace MagBot.DatabaseContexts
             {
                 connection = json["ConnectionStrings"]["SunburstRemote"].ToString();
             }
-            else throw new Exception("Invalid environment. Must be Development or Migration.");
+            else throw new Exception("Invalid environment. SUNBURST_ENV must be Development or Migration.");
 ;
             optionsBuilder.UseNpgsql(connection);
 
