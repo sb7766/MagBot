@@ -26,12 +26,13 @@ namespace MagBot.Modules
 
             [Command("")]
             [Alias("query")]
+            [Priority(1)]
             [Summary("Gets all tags for the specified keyword.")]
             public async Task TagQuery(string keyword)
             {
                 keyword = keyword.ToLower();
 
-                var guild = await _sunburstdb.Guilds.FindAsync(Context.Guild.Id);
+                var guild = await _sunburstdb.Guilds.FirstOrDefaultAsync(g => g.DiscordId == Context.Guild.Id);
 
                 await _sunburstdb.Entry(guild).Collection(g => g.TagLists).LoadAsync();
 
@@ -54,6 +55,7 @@ namespace MagBot.Modules
             }
 
             [Command("add")]
+            [Priority(2)]
             [Summary("Adds a tag to the specifed keyword.")]
             public async Task TagAdd(string keyword, [Remainder] string tag)
             {
@@ -87,12 +89,13 @@ namespace MagBot.Modules
 
             [Command("remove")]
             [Alias("delete")]
+            [Priority(2)]
             [Summary("Remove a single tag from a keyword. First tag is 0.")]
             public async Task TagRemove(string keyword, int tagIndex)
             {
                 keyword = keyword.ToLower();
 
-                var guild = await _sunburstdb.Guilds.FindAsync(Context.Guild.Id);
+                var guild = await _sunburstdb.Guilds.FirstOrDefaultAsync(g => g.DiscordId == Context.Guild.Id);
 
                 await _sunburstdb.Entry(guild).Collection(g => g.TagLists).LoadAsync();
 
@@ -126,6 +129,7 @@ namespace MagBot.Modules
             }
 
             [Command("clear")]
+            [Priority(2)]
             [Summary("Clears all of the tags for a keyword.")]
             public async Task TagClear(string keyword)
             {
@@ -152,6 +156,7 @@ namespace MagBot.Modules
             }
 
             [Command("list")]
+            [Priority(2)]
             [Summary("Sends a DM with all keywords with tags in the current guild.")]
             public async Task TagList()
             {
@@ -180,7 +185,18 @@ namespace MagBot.Modules
         [Summary("Don't mlem me, I'm shy..")]
         public async Task Mlem()
         {
-            await ReplyAsync("*eeps and hides under his wizard robe*");
+            List<string> replies = new List<string>
+            {
+                "*eeps and hides under his wizard robe*",
+                $"*mlems {Context.User.Mention} back shyly*",
+                "*squeaks and blushes profusely*",
+                "*blushing and squirms a bit, playing with his robe*"
+            };
+            var rand = new Random();
+
+            string reply = replies[rand.Next(0, replies.Count)];
+
+            await ReplyAsync(reply);
         }
 
         [Command("roll")]
@@ -238,7 +254,7 @@ namespace MagBot.Modules
                     choiceList = choices.Split(' ').ToList();
 
                 int num = rand.Next(0, choiceList.Count);
-                result += choiceList[num];
+                result += choiceList[num].Trim();
             }
 
             await ReplyAsync($"{result}!");
