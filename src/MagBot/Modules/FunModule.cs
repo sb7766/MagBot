@@ -190,7 +190,10 @@ namespace MagBot.Modules
                 "*eeps and hides under his wizard robe*",
                 $"*mlems {Context.User.Mention} back shyly*",
                 "*squeaks and blushes profusely*",
-                "*blushing and squirms a bit, playing with his robe*"
+                "*blushes and squirms a bit, playing with his robe*",
+                "*scrunches his snoot and bleps*",
+                "aaaa *hides*",
+                "n-nu.. not the mlems.."
             };
             var rand = new Random();
 

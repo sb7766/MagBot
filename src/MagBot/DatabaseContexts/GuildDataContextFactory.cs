@@ -15,7 +15,7 @@ namespace MagBot.DatabaseContexts
         public GuildDataContext Create(DbContextFactoryOptions options)
         {
             var optionsBuilder = new DbContextOptionsBuilder<GuildDataContext>();
-            JObject json = JObject.Parse(File.ReadAllText(Path.Combine(AppContext.BaseDirectory, "Config/DevSecrets")));
+            JObject json = JObject.Parse(File.ReadAllText(Path.Combine(AppContext.BaseDirectory, "Config/DevSecrets.json")));
             string connection;
 
             if (Environment.GetEnvironmentVariable("SUNBURST_ENV") == "Development")
