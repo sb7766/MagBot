@@ -234,5 +234,36 @@ namespace MagBot.Modules
 
             return new Tuple<string, Embed>(imageUrl, embed.Build());
         }
+
+        [Command("urbandictionary")]
+        [Alias("ud")]
+        [Summary("Get the top Urban Dictionary definition for the given term.")]
+        public async Task UrbanDictionary([Remainder] string term)
+        {
+            var jsonString = await new HttpClient().GetStringAsync($"http://api.urbandictionary.com/v0/define?term={term}");
+            var json = JObject.Parse(jsonString);
+
+            if (json == null || json.Value<string>("result_type") == "no_results")
+            {
+                await ReplyAsync($"No results found. Sorry, {Context.User.Mention}!");
+                return;
+            }
+
+            var result = json["list"][0];
+
+            var embed = new EmbedBuilder
+            {
+                Color = new Color(29, 36, 57),
+                Title = result.Value<string>("word"),
+                Url = result.Value<string>("permalink"),
+                Description = $"Author: {result["author"]}"
+            };
+
+            embed.AddField("Definition", result.Value<string>("definition"))
+                .AddField("Example", result.Value<string>("example"))
+                .Build();
+
+            await ReplyAsync($"Here you go, {Context.User.Mention}!", false, embed);
+        }
     }
 }

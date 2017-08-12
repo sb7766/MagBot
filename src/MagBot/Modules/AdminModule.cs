@@ -57,11 +57,10 @@ namespace MagBot.Modules
                 throw new Exception("No attachment of correct type.");
             }
 
-            var img = await new HttpClient().GetAsync(attachment.Url);
-            Stream imgStream = await img.Content.ReadAsStreamAsync();
+            var img = await new HttpClient().GetStreamAsync(attachment.Url);
             await Context.Client.CurrentUser.ModifyAsync((c) =>
             {
-                c.Avatar = new Discord.Image(imgStream);
+                c.Avatar = new Discord.Image(img);
             });
             await ReplyAsync("Avatar updated!");
         }
