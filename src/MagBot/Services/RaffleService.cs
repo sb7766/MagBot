@@ -7,6 +7,7 @@ using Discord.WebSocket;
 using MagBot.DatabaseContexts;
 using System.Threading;
 using Discord;
+using Microsoft.Extensions.Configuration;
 
 namespace MagBot.Services
 {
@@ -16,11 +17,13 @@ namespace MagBot.Services
 
         private readonly DiscordSocketClient _client;
         private readonly GuildDataContext _sunburstdb;
+        private readonly IConfiguration _config;
 
-        public RaffleService(DiscordSocketClient client, GuildDataContext sunburstdb)
+        public RaffleService(DiscordSocketClient client, GuildDataContext sunburstdb, IConfiguration config)
         {
             _client = client;
             _sunburstdb = sunburstdb;
+            _config = config;
         }
 
         // Set up the timer to automatically end and prune raffles
@@ -136,8 +139,8 @@ namespace MagBot.Services
             await _sunburstdb.SaveChangesAsync();
 
             await context.Channel.SendMessageAsync($"Raffle created for {context.User.Mention} with ID `{raffle.Id}`. " +
-                $"To start the raffle use `m!raffle start {raffle.Id}`. " +
-                $"You can configure additional settings with the sub-commands of 'm!raffle config'. " +
+                $"To start the raffle use `{_config["commandPrefix"]}raffle start {raffle.Id}`. " +
+                $"You can configure additional settings with the sub-commands of `{_config["commandPrefix"]}raffle config`. " +
                 $"If you do not start the raffle within 15 minutes, it will be cancelled.");
         }
 
@@ -193,7 +196,7 @@ namespace MagBot.Services
             }
             else if (raffle.Started)
             {
-                throw new Exception($"Raffle already started, please use `m!raffle end {id} true` to cancel without picking winners.");
+                throw new Exception($"Raffle already started, please use `{_config["commandPrefix"]}raffle end {id} true` to cancel without picking winners.");
             }
 
             guild.Raffles.Remove(raffle);
@@ -470,7 +473,7 @@ namespace MagBot.Services
             }
             else if (raffle.Started)
             {
-                throw new Exception("Raffle already started, please use `m!raffle end true` to cancel without picking winners.");
+                throw new Exception($"Raffle already started, please use `{_config["commandPrefix"]}raffle end true` to cancel without picking winners.");
             }
 
             raffle.StartedAt = DateTime.Now;
@@ -480,7 +483,7 @@ namespace MagBot.Services
             await _sunburstdb.SaveChangesAsync();
 
             await context.Channel.SendMessageAsync($"{context.User.Mention} has started a raffle! " +
-                $"Use `m!raffle enter {id}` to enter and `m!raffle info {id}` for more information about the raffle.");
+                $"Use `{_config["commandPrefix"]}raffle enter {id}` to enter and `{_config["commandPrefix"]}raffle info {id}` for more information about the raffle.");
         }
 
         // Allow the raffle owner to end a raffle before the end time
@@ -500,7 +503,7 @@ namespace MagBot.Services
             }
             else if (!raffle.Started)
             {
-                throw new Exception($"Raffle not yet started, please use `m!raffle cancel {id}` to cancel.");
+                throw new Exception($"Raffle not yet started, please use `{_config["commandPrefix"]}raffle cancel {id}` to cancel.");
             }
 
             if (noDraw)
