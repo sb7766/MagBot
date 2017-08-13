@@ -129,6 +129,7 @@ namespace MagBot.Modules
         }
 
         [Command("enter")]
+        [Alias("join")]
         [Summary("Enter a specific raffle.")]
         public async Task RaffleEnter(int raffleId)
         {
