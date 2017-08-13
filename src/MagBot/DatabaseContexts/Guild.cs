@@ -15,6 +15,8 @@ namespace MagBot.DatabaseContexts
         [NotMapped]
         public ulong DiscordId { get { return (ulong)DiscordIdLong; } set { DiscordIdLong = (long)value; } }
         public long DiscordIdLong { get; set; }
+        
+        public string CustomPrefix { get; set; }
 
         public List<TagList> TagLists { get; set; }
         public List<Raffle> Raffles { get; set; }

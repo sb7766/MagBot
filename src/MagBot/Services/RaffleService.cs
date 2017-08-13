@@ -28,37 +28,34 @@ namespace MagBot.Services
         {
             masterTimer = new Timer(async (e) =>
             {
-                foreach (var g in _sunburstdb.Guilds.ToList())
+                var raffles = _sunburstdb.Raffles;
+
+                // List of raffles to be pruned
+                List<Raffle> removelist = raffles.Where(ra => !ra.Started && DateTime.Now - ra.CreatedAt >= TimeSpan.FromMinutes(15)).ToList();
+
+                foreach (var r in removelist)
                 {
-                    await _sunburstdb.Entry(g).Collection(gu => gu.Raffles).LoadAsync();
-                    var raffles = g.Raffles;
-
-                    // List of raffles to be pruned
-                    List<Raffle> removelist = raffles.Where(ra => !ra.Started && DateTime.Now - ra.CreatedAt >= TimeSpan.FromMinutes(15)).ToList();
-
-                    foreach (var r in removelist)
-                    {
-                        var gu = _client.GetGuild(g.DiscordId);
-                        var user = _client.GetUser(r.Owner);
-                        var ch = await user.GetOrCreateDMChannelAsync();
-                        await ch.SendMessageAsync($"Your raffle in {gu.Name} was automatically cancelled.");
-                        raffles.Remove(r);
-                    }
-
-                    // List of raffles that are complete
-                    List<Raffle> startedList = raffles.Where(ra => ra.Started).ToList();
-
-                    foreach (var r in startedList)
-                    {
-                        await _sunburstdb.Entry(r).Reference(ra => ra.Config).LoadAsync();
-                        if (DateTime.Now >= r.StartedAt + r.Config.Length)
-                        {
-                            await DrawWinners(r);
-                        }
-                    }
-
-                    await _sunburstdb.SaveChangesAsync();
+                    await _sunburstdb.Entry(r).Reference(ra => ra.Guild).LoadAsync();
+                    var gu = _client.GetGuild(r.Guild.DiscordId);
+                    var user = _client.GetUser(r.Owner);
+                    var ch = await user.GetOrCreateDMChannelAsync();
+                    await ch.SendMessageAsync($"Your raffle in {gu.Name} was automatically cancelled.");
+                    raffles.Remove(r);
                 }
+
+                // List of raffles that are complete
+                List<Raffle> startedList = raffles.Where(ra => ra.Started).ToList();
+
+                foreach (var r in startedList)
+                {
+                    await _sunburstdb.Entry(r).Reference(ra => ra.Config).LoadAsync();
+                    if (DateTime.Now >= r.StartedAt + r.Config.Length)
+                    {
+                        await DrawWinners(r);
+                    }
+                }
+
+                await _sunburstdb.SaveChangesAsync();
                 
             }, null, TimeSpan.FromSeconds(10), TimeSpan.FromSeconds(15));
         }

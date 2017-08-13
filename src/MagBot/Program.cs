@@ -12,6 +12,7 @@ using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using System.Threading;
+using Discord.Addons.Interactive;
 
 namespace MagBot
 {
@@ -87,6 +88,7 @@ namespace MagBot
                 .AddSingleton<ClientConfigService>()
                 .AddSingleton<ConsoleCommandService>()
                 .AddDbContext<GuildDataContext>(options => options.UseNpgsql(_config.GetConnectionString("Sunburst")))
+                .AddSingleton<InteractiveService>()
                 .BuildServiceProvider();
         }
 

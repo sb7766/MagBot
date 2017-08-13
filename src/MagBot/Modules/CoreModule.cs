@@ -7,11 +7,12 @@ using Discord.Commands;
 using Discord.WebSocket;
 using System.Runtime.InteropServices;
 using System.Diagnostics;
+using MagBot.DatabaseContexts;
 
 namespace MagBot.Modules
 {
     [Name("Core")]
-    public class CoreModule : ModuleBase 
+    public class CoreModule : ModuleBase
     {
         private readonly CommandService _commands;
         private readonly IServiceProvider _provider;
@@ -112,7 +113,7 @@ namespace MagBot.Modules
                             }
                             else usage += "`\n";
                         }
-                        
+
 
                         embed.AddField(new EmbedFieldBuilder
                         {
@@ -153,7 +154,7 @@ namespace MagBot.Modules
                     }
                 }
 
-                if(!cmdResult.IsSuccess && !modResult.IsSuccess)
+                if (!cmdResult.IsSuccess && !modResult.IsSuccess)
                 {
                     throw new Exception("You do not have the permission to access that command or group.");
                 }
@@ -165,11 +166,11 @@ namespace MagBot.Modules
             {
                 throw new Exception("Invalid command.");
             }
-            
 
-            
+
+
         }
-            
+
 
         [Command("help")]
         public async Task Help()
@@ -216,8 +217,41 @@ namespace MagBot.Modules
             await ReplyAsync($"Farewell, users of {Context.Guild.Name}!");
             var application = await Context.Client.GetApplicationInfoAsync();
             var ownerchannel = await Context.Client.GetDMChannelAsync(application.Owner.Id);
-            await ownerchannel.SendMessageAsync($"Mag-Bot has left server {Context.Guild.Name} ({Context.Guild.Id})");
+            await ownerchannel.SendMessageAsync($"{application.Name} has left guild {Context.Guild.Name} (ID: {Context.Guild.Id})");
             await Context.Guild.LeaveAsync();
         }
+
+        [Group("prefix")]
+        [RequireContext(ContextType.Guild)]
+        public class Prefix : ModuleBase
+        {
+            private readonly GuildDataContext _sunburst;
+
+            public Prefix(GuildDataContext sunburst)
+            {
+                _sunburst = sunburst;
+            }
+
+            [Command("")]
+            public async Task PrefixSet(string prefix)
+            {
+                var guild = _sunburst.Guilds.FirstOrDefault(g => g.DiscordId == Context.Guild.Id);
+                guild.CustomPrefix = prefix;
+                await _sunburst.SaveChangesAsync();
+                await ReplyAsync($"Prefix set to `{prefix}`!");
+            }
+
+            [Command("clear")]
+            [Alias("reset")]
+            [Priority(2)]
+            public async Task PrefixClear()
+            {
+                var guild = _sunburst.Guilds.FirstOrDefault(g => g.DiscordId == Context.Guild.Id);
+                guild.CustomPrefix = null;
+                await _sunburst.SaveChangesAsync();
+                await ReplyAsync("Prefix reset to default!");
+            }
+        }
+        
     }
 }

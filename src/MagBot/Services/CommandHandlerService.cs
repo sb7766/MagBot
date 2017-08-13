@@ -7,6 +7,7 @@ using Discord.WebSocket;
 using Discord.Commands;
 using System.Reflection;
 using MagBot.Services;
+using MagBot.DatabaseContexts;
 using Microsoft.Extensions.Configuration;
 
 namespace MagBot.Services
@@ -17,13 +18,15 @@ namespace MagBot.Services
         private readonly DiscordSocketClient _discord;
         private readonly IConfiguration _config;
         private IServiceProvider _provider;
+        private readonly GuildDataContext _sunburst;
 
-        public CommandHandlerService(IServiceProvider provider, DiscordSocketClient discord, CommandService commands, IConfiguration config)
+        public CommandHandlerService(IServiceProvider provider, DiscordSocketClient discord, CommandService commands, IConfiguration config, GuildDataContext sunburst)
         {
             _discord = discord;
             _commands = commands;
             _provider = provider;
             _config = config;
+            _sunburst = sunburst;
 
             _discord.MessageReceived += MessageReceived;
         }
@@ -42,7 +45,12 @@ namespace MagBot.Services
             if (message.Source != MessageSource.User) return;
 
             int argPos = 0;
-            if (!message.HasStringPrefix(_config["commandPrefix"], ref argPos)) return;
+            string customPrefix = _sunburst.Guilds.FirstOrDefault(g => g.DiscordId == _discord.Guilds.FirstOrDefault(gu => gu.Channels.FirstOrDefault(c => c.Id == message.Channel.Id) != null).Id)?.CustomPrefix;
+            if (customPrefix != null && customPrefix != "")
+            {
+                if (!message.HasStringPrefix(customPrefix, ref argPos)) return;
+            }
+            else if (!message.HasStringPrefix(_config["commandPrefix"], ref argPos)) return;
 
             var context = new SocketCommandContext(_discord, message);
             var result = await _commands.ExecuteAsync(context, argPos, _provider);

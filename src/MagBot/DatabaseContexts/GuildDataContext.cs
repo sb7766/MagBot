@@ -14,10 +14,6 @@ namespace MagBot.DatabaseContexts
         { }
 
         public DbSet<Guild> Guilds { get; set; }
-
-        //protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-        //{
-        //    optionsBuilder.UseNpgsql(_config["connectionString"]);
-        //}
+        public DbSet<Raffle> Raffles { get; set; }
     }
 }
