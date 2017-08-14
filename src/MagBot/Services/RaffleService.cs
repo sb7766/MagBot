@@ -31,7 +31,9 @@ namespace MagBot.Services
         {
             masterTimer = new Timer(async (e) =>
             {
-                foreach (var g in _sunburstdb.Guilds.ToList())
+                var guilds = _sunburstdb.Guilds.ToList();
+
+                foreach (var g in guilds)
                 {
                     await _sunburstdb.Entry(g).Collection(gu => gu.Raffles).LoadAsync();
                     var raffles = g.Raffles;
@@ -480,9 +482,11 @@ namespace MagBot.Services
             raffle.Started = true;
             raffle.Channel = context.Channel.Id;
 
+            await _sunburstdb.Entry(raffle).Reference(r => r.Config).LoadAsync();
+
             await _sunburstdb.SaveChangesAsync();
 
-            await context.Channel.SendMessageAsync($"{context.User.Mention} has started a raffle! " +
+            await context.Channel.SendMessageAsync($"Attention @everyone: {context.User.Mention} has started a raffle! The prize is '{raffle.Config.Prize}'! " +
                 $"Use `{_config["commandPrefix"]}raffle enter {id}` to enter and `{_config["commandPrefix"]}raffle info {id}` for more information about the raffle.");
         }
 
@@ -531,10 +535,10 @@ namespace MagBot.Services
             {
                 throw new Exception("Raffle does not exist.");
             }
-            //else if (raffle.Owner == context.User.Id)
-            //{
-            //    throw new Exception("You are the raffle owner!");
-            //}
+            else if (raffle.Owner == context.User.Id)
+            {
+                throw new Exception("You are the raffle owner!");
+            }
             else if (!raffle.Started)
             {
                 throw new Exception($"Raffle not yet started.");
@@ -580,10 +584,10 @@ namespace MagBot.Services
             {
                 throw new Exception("Raffle does not exist.");
             }
-            //else if (raffle.Owner == context.User.Id)
-            //{
-            //    throw new Exception("You are the raffle owner!");
-            //}
+            else if (raffle.Owner == context.User.Id)
+            {
+                throw new Exception("You are the raffle owner!");
+            }
             else if (!raffle.Started)
             {
                 throw new Exception($"Raffle not yet started.");
