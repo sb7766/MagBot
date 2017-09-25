@@ -159,7 +159,7 @@ namespace MagBot.Modules
                 }
 
                 embed.Build();
-                await ReplyAsync("", false, embed);
+                await ReplyAsync("", false, embed.Build());
             }
             else
             {
@@ -182,8 +182,10 @@ namespace MagBot.Modules
 
             foreach (ModuleInfo mod in _commands.Modules.Where(m => !m.IsSubmodule))
             {
-                EmbedFieldBuilder modField = new EmbedFieldBuilder();
-                modField.IsInline = false;
+                EmbedFieldBuilder modField = new EmbedFieldBuilder
+                {
+                    IsInline = false
+                };
                 string name = mod.Name;
                 modField.Name = name;
                 var comList = new List<string>();
@@ -204,7 +206,7 @@ namespace MagBot.Modules
                 embed.AddField(modField);
             }
             embed.Build();
-            await ReplyAsync("", false, embed);
+            await ReplyAsync("", false, embed.Build());
         }
 
         [Command("leaveguild")]

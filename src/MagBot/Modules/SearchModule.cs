@@ -2,8 +2,9 @@
 using System.Collections.Generic;
 using System.Text;
 using Discord.Commands;
-using System.Threading.Tasks;
 using Discord;
+using Discord.WebSocket;
+using System.Threading.Tasks;
 using Newtonsoft.Json.Linq;
 using System.Net.Http;
 using Google.Apis.YouTube.v3;
@@ -31,7 +32,8 @@ namespace MagBot.Modules
             // explicit https://derpibooru.org/search.json?q=&sf=random&filter_id=56027
             // safe https://derpibooru.org/search.json?q=&sf=random&filter_id=100073
             string search = "";
-            if (Context.Channel.IsNsfw)
+
+            if ((Context.Channel as ITextChannel).IsNsfw)
             {
                 search = $"https://derpibooru.org/search.json?q={tags}&sf=random&filter_id=56027";
             }
@@ -48,7 +50,7 @@ namespace MagBot.Modules
         public async Task Derpibooru()
         {
             string search = "";
-            if (Context.Channel.IsNsfw)
+            if ((Context.Channel as ITextChannel).IsNsfw)
             {
                 search = $"https://derpibooru.org/search.json?q=*&sf=random&filter_id=56027";
             }
@@ -81,9 +83,9 @@ namespace MagBot.Modules
             };
 
             string tags = searchResult.Value<string>("tags");
-            if (tags.Length > 1024) tags.Remove(1023);
-            embed.AddInlineField("Score", searchResult["score"])
-                .AddInlineField("Faves", searchResult["faves"])
+            if (tags.Length > 1024) tags = tags.Remove(1023);
+            embed.AddField("Score", searchResult["score"], true)
+                .AddField("Faves", searchResult["faves"], true)
                 .AddField("Tags", tags);
 
 
@@ -172,7 +174,7 @@ namespace MagBot.Modules
             // explicit https://derpibooru.org/search.json?q=&sf=random&filter_id=56027
             // safe https://derpibooru.org/search.json?q=&sf=random&filter_id=100073
             string search = "";
-            if (Context.Channel.IsNsfw)
+            if ((Context.Channel as ITextChannel).IsNsfw)
             {
                 search = $"https://e621.net/post/index.json?tags=order:random+{tags}&limit=5";
             }
@@ -189,7 +191,7 @@ namespace MagBot.Modules
         public async Task E621()
         {
             string search = "";
-            if (Context.Channel.IsNsfw)
+            if ((Context.Channel as ITextChannel).IsNsfw)
             {
                 search = $"https://e621.net/post/index.json?tags=order:random&limit=5";
             }
@@ -224,9 +226,9 @@ namespace MagBot.Modules
             };
 
             string tags = searchResult.Value<string>("tags");
-            if (tags.Length > 1024) tags.Remove(1023);
-            embed.AddInlineField("Score", searchResult["score"])
-                .AddInlineField("Faves", searchResult["fav_count"])
+            if (tags.Length > 1024) tags = tags.Remove(1023);
+            embed.AddField("Score", searchResult["score"], true)
+                .AddField("Faves", searchResult["fav_count"], true)
                 .AddField("Tags", tags);
 
 
@@ -263,7 +265,7 @@ namespace MagBot.Modules
                 .AddField("Example", result.Value<string>("example"))
                 .Build();
 
-            await ReplyAsync($"Here you go, {Context.User.Mention}!", false, embed);
+            await ReplyAsync($"Here you go, {Context.User.Mention}!", false, embed.Build());
         }
     }
 }
