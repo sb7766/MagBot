@@ -82,11 +82,11 @@ namespace MagBot.Modules
                 ThumbnailUrl = $"https:{searchResult["representations"]["thumb_small"]}"
             };
 
-            string tags = searchResult.Value<string>("tags");
-            if (tags.Length > 1024) tags = tags.Remove(1023);
+            //string tags = searchResult.Value<string>("tags");
+            //if (tags.Length > 1024) tags = tags.Remove(1023);
             embed.AddField("Score", searchResult["score"], true)
-                .AddField("Faves", searchResult["faves"], true)
-                .AddField("Tags", tags);
+                .AddField("Faves", searchResult["faves"], true);
+                //.AddField("Tags", tags);
 
 
             string imageUrl = $"https:{searchResult.Value<string>("image")}";
@@ -225,11 +225,11 @@ namespace MagBot.Modules
                 ThumbnailUrl = searchResult.Value<string>("preview_url")
             };
 
-            string tags = searchResult.Value<string>("tags");
-            if (tags.Length > 1024) tags = tags.Remove(1023);
+            //string tags = searchResult.Value<string>("tags");
+            //if (tags.Length > 1024) tags = tags.Remove(1023);
             embed.AddField("Score", searchResult["score"], true)
-                .AddField("Faves", searchResult["fav_count"], true)
-                .AddField("Tags", tags);
+                .AddField("Faves", searchResult["fav_count"], true);
+                //.AddField("Tags", tags);
 
 
             string imageUrl = searchResult.Value<string>("file_url");

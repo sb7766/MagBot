@@ -15,7 +15,7 @@ namespace MagBot
             {
                 foreach (var cmd in mod.Commands)
                 {
-                    var result = await precondition.CheckPermissions(context, cmd, provider).ConfigureAwait(false);
+                    var result = await precondition.CheckPermissionsAsync(context, cmd, provider).ConfigureAwait(false);
                     if (result.IsSuccess)
                         return result;
                 }
