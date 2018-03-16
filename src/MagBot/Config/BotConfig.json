@@ -3,8 +3,7 @@
     "IncludeScopes": false,
     "LogLevel": {
       "Default": "Information",
-      "Microsoft.EntityFrameworkCore.Storage.IRelationalCommandBuilderFactory": "Warning",
-      "Microsoft.EntityFrameworkCore.Query.Internal.NpgsqlQueryCompilationContextFactory": "Error"
+      "Microsoft.EntityFrameworkCore": "Error"
     }
   }
 }

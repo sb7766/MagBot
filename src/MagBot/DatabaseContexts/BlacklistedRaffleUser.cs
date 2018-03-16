@@ -14,7 +14,7 @@ namespace MagBot.DatabaseContexts
         
         [NotMapped]
         public ulong UserId { get { return (ulong)UserIdLong; } set { UserIdLong = (long)value; } }
-        private long UserIdLong { get; set; }
+        public long UserIdLong { get; set; }
 
         public RaffleConfig RaffleConfig { get; set; }
         public int RaffleConfigId { get; set; }

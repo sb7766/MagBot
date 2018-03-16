@@ -11,9 +11,10 @@ using System;
 namespace MagBot.Migrations
 {
     [DbContext(typeof(GuildDataContext))]
-    partial class GuildDataContextModelSnapshot : ModelSnapshot
+    [Migration("20180316034007_Migration3")]
+    partial class Migration3
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

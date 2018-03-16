@@ -12,6 +12,7 @@ using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using System.Threading;
+using Discord.Addons.Interactive;
 
 namespace MagBot
 {
@@ -77,6 +78,7 @@ namespace MagBot
                 .AddSingleton(_client)
                 .AddSingleton<CommandService>()
                 .AddSingleton<CommandHandlerService>()
+                .AddSingleton<InteractiveService>()
                 // Raffles
                 .AddSingleton<RaffleService>()
                 // Logging

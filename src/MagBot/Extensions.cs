@@ -4,6 +4,8 @@ using System.Linq;
 using System.Threading.Tasks;
 using Discord.WebSocket;
 using Discord.Commands;
+using Discord.Addons.Interactive;
+using Discord;
 
 namespace MagBot
 {
@@ -22,6 +24,17 @@ namespace MagBot
             }
 
             return PreconditionResult.FromError("User has no permissions for commands in this module.");
+        }
+
+        public class EnsureSpecifiedChannel : ICriterion<SocketMessage>
+        {
+            private readonly ulong _channelId;
+
+            public EnsureSpecifiedChannel(IMessageChannel channel)
+                => _channelId = channel.Id;
+
+            public Task<bool> JudgeAsync(SocketCommandContext sourceContext, SocketMessage parameter)
+                => Task.FromResult(parameter.Channel.Id == _channelId && parameter.Author != sourceContext.Client.CurrentUser);
         }
     }
 }
