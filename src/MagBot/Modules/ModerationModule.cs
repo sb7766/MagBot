@@ -47,9 +47,9 @@ namespace MagBot.Modules
 
                 if (guild.ReportingEnabled)
                 {
-                    var msg = await dm.SendMessageAsync($"```md\n# You have opened a reply in the {Context.Channel.Name} channel of {Context.Guild.Name}.\n" +
-                        $"# You have 1 minute to type out your report.\n" +
-                        $"Type 'cancel' to cancel.```");
+                    var msg = await dm.SendMessageAsync($"```md\n# You have opened a report in the {Context.Channel.Name} channel of {Context.Guild.Name}.\n\n" +
+                        $"# You have 1 minute to type out your report. Please do so now.\n\n" +
+                        $"Type 'cancel' to cancel the report.```");
 
                     var response = await NextMessageAsync(new EnsureSpecifiedChannel(dm), timeout: TimeSpan.FromMinutes(1));
 
@@ -66,13 +66,18 @@ namespace MagBot.Modules
                             await msg.DeleteAsync();
                             var channel = Context.Guild.GetTextChannel(guild.ReportingChannelId);
                             var role = Context.Guild.GetRole(guild.ReportingRoleId);
+
+                            guild.ReportNumber++;
+
                             await channel.SendMessageAsync($"{role.Mention}", embed: new EmbedBuilder
                             {
-                                Title = "Report",
+                                Title = $"Report #{ guild.ReportNumber }",
                                 Color = Color.Red,
                                 Description = $"Report created in channel { Context.Channel.Name } by { Context.User.Mention } (ID: { Context.User.Id }) on { Context.Message.Timestamp.ToString("R")}.",
                                 Fields = { new EmbedFieldBuilder { Name = "Report Text", Value = $"{ response.Content }" } }
                             }.Build());
+
+                            await _sunburstdb.SaveChangesAsync();
 
                             await dm.SendMessageAsync("Your report has been delivered.");
                             return;
@@ -100,7 +105,7 @@ namespace MagBot.Modules
             {
                 var guild = await _sunburstdb.Guilds.FirstOrDefaultAsync(g => g.DiscordId == Context.Guild.Id);
 
-                var msg = await ReplyAsync("```md\n# Setting up reporting. Please mention the role you would like reports sent to:\n" +
+                var msg = await ReplyAsync("```md\n# Setting up reporting. Please mention the role you would like reports sent to:\n\n" +
                     "Type 'cancel' to stop setup.```");
 
                 GetRoleResponse:
@@ -132,7 +137,7 @@ namespace MagBot.Modules
                 }
 
                 await msg.DeleteAsync();
-                msg = await ReplyAsync("```md\n# Role set. Please mention the channel you would like reports sent to:\n" +
+                msg = await ReplyAsync("```md\n# Role set. Please mention the channel you would like reports sent to:\n\n" +
                     "Type 'cancel' to stop setup.```");
 
                 GetChannelResponse:

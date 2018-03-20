@@ -23,6 +23,7 @@ namespace MagBot.DatabaseContexts
         [NotMapped]
         public ulong ReportingRoleId { get { return (ulong)ReportingRoleIdLong; } set { ReportingRoleIdLong = (long)value; } }
         public long ReportingRoleIdLong { get; set; }
+        public int ReportNumber { get; set; }
 
 
         public List<TagList> TagLists { get; set; }
