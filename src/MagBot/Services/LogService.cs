@@ -45,13 +45,13 @@ namespace MagBot.Services
             factory.AddProvider(new FileLoggerProvider(new FileLoggerConfig
             {
                 LogLevel = LogLevel.Error,
-                FilePath = Environment.CurrentDirectory + @"\errorlog.txt"
+                FilePath = Environment.CurrentDirectory + "/errorlog.txt"
             }));
             if (_config["logDebug"] == "true")
             factory.AddProvider(new FileLoggerProvider(new FileLoggerConfig
             {
                 LogLevel = LogLevel.Debug,
-                FilePath = Environment.CurrentDirectory + @"\debuglog.txt"
+                FilePath = Environment.CurrentDirectory + "/debuglog.txt"
             }));
 
             return factory;
@@ -95,7 +95,7 @@ namespace MagBot.Services
     {
         public LogLevel LogLevel { get; set; } = LogLevel.Warning;
         public int EventId { get; set; } = 0;
-        public string FilePath { get; set; } = Environment.CurrentDirectory + @"\logfile.txt";
+        public string FilePath { get; set; } = Environment.CurrentDirectory + "/logfile.txt";
     }
 
     public class FileLogger : ILogger
@@ -128,6 +128,7 @@ namespace MagBot.Services
 
             if (_config.EventId == 0 || _config.EventId == eventId.Id)
             {
+                if (!File.Exists(_config.FilePath)) File.Create(_config.FilePath);
                 using (StreamWriter writer = new StreamWriter(_config.FilePath, true))
                 {
                     writer.WriteLine($"{logLevel.ToString()}: {_name}[{eventId.Id}] at {DateTime.Now}\n{formatter(state, exception)}\n");
