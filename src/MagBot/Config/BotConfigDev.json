@@ -1,4 +1,5 @@
 ﻿{
   "currentGame": "testing new things!",
-  "commandPrefix": "st!" 
+  "commandPrefix": "st!",
+  "logDebug":  "true"
 }

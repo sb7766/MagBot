@@ -1,4 +1,5 @@
 ﻿{
   "currentGame": "s!help for my spells!",
-  "commandPrefix": "s!"
+  "commandPrefix": "s!",
+  "logDebug":  "false"
 }

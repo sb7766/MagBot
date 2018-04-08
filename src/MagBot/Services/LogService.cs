@@ -47,6 +47,7 @@ namespace MagBot.Services
                 LogLevel = LogLevel.Error,
                 FilePath = Environment.CurrentDirectory + @"\errorlog.txt"
             }));
+            if (_config["logDebug"] == "true")
             factory.AddProvider(new FileLoggerProvider(new FileLoggerConfig
             {
                 LogLevel = LogLevel.Debug,
@@ -115,7 +116,7 @@ namespace MagBot.Services
 
         public bool IsEnabled(LogLevel logLevel)
         {
-            return logLevel == _config.LogLevel;
+            return logLevel >= _config.LogLevel;
         }
 
         public void Log<TState>(LogLevel logLevel, EventId eventId, TState state, Exception exception, Func<TState, Exception, string> formatter)
