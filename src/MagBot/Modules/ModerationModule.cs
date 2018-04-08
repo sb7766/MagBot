@@ -95,7 +95,7 @@ namespace MagBot.Modules
             [Command("enable", RunMode = RunMode.Async)]
             [Priority(2)]
             [Summary("Sets up/enables reporting for the server. Please be sure to mention the role and channel name properly.")]
-            [RequireUserPermission(Discord.GuildPermission.ManageGuild)]
+            [RequireUserPermission(GuildPermission.ManageGuild)]
             public async Task ReportEnable()
             {
                 var guild = await _sunburstdb.Guilds.FirstOrDefaultAsync(g => g.DiscordId == Context.Guild.Id);
@@ -115,19 +115,19 @@ namespace MagBot.Modules
                     else if (response.Content.ToLower() == "cancel")
                     {
                         await msg.DeleteAsync();
-                        await ReplyAndDeleteAsync("Setup cancelled.", timeout: TimeSpan.FromSeconds(5));
+                        await ReplyAndDeleteAsync("Setup cancelled.", timeout: TimeSpan.FromSeconds(10));
                         return;
                     }
                     else
                     {
-                        await ReplyAndDeleteAsync("Invalid response, be sure to mention a role.", timeout: TimeSpan.FromSeconds(5));
+                        await ReplyAndDeleteAsync("Invalid response, be sure to mention a role.", timeout: TimeSpan.FromSeconds(10));
                         goto GetRoleResponse;
                     }
                 }
                 else
                 {
                     await msg.DeleteAsync();
-                    await ReplyAndDeleteAsync("Request timed out.", timeout: TimeSpan.FromSeconds(5));
+                    await ReplyAndDeleteAsync("Request timed out.", timeout: TimeSpan.FromSeconds(10));
                     return;
                 }
 
@@ -150,26 +150,26 @@ namespace MagBot.Modules
                         }
                         else
                         {
-                            await ReplyAndDeleteAsync("I do not have permission to send messages to that channel.", timeout: TimeSpan.FromSeconds(5));
+                            await ReplyAndDeleteAsync("I do not have permission to send messages to that channel.", timeout: TimeSpan.FromSeconds(10));
                             goto GetChannelResponse;
                         }
                     }
                     else if (response.Content.ToLower() == "cancel")
                     {
                         await msg.DeleteAsync();
-                        await ReplyAndDeleteAsync("Setup cancelled.", timeout: TimeSpan.FromSeconds(5));
+                        await ReplyAndDeleteAsync("Setup cancelled.", timeout: TimeSpan.FromSeconds(10));
                         return;
                     }
                     else
                     {
-                        await ReplyAndDeleteAsync("Invalid response, be sure to mention a channel.", timeout: TimeSpan.FromSeconds(5));
+                        await ReplyAndDeleteAsync("Invalid response, be sure to mention a channel.", timeout: TimeSpan.FromSeconds(10));
                         goto GetChannelResponse;
                     }
                 }
                 else
                 {
                     await msg.DeleteAsync();
-                    await ReplyAndDeleteAsync("Request timed out.", timeout: TimeSpan.FromSeconds(5));
+                    await ReplyAndDeleteAsync("Request timed out.", timeout: TimeSpan.FromSeconds(10));
                     return;
                 }
 
@@ -183,7 +183,7 @@ namespace MagBot.Modules
             [Command("disable", RunMode = RunMode.Async)]
             [Priority(2)]
             [Summary("Disables reporting for the server.")]
-            [RequireUserPermission(Discord.GuildPermission.ManageGuild)]
+            [RequireUserPermission(GuildPermission.ManageGuild)]
             public async Task ReportDisable()
             {
                 var guild = await _sunburstdb.Guilds.FirstOrDefaultAsync(g => g.DiscordId == Context.Guild.Id);

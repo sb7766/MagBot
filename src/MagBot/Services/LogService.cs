@@ -8,6 +8,8 @@ using MagBot.DatabaseContexts;
 using Microsoft.EntityFrameworkCore.Storage;
 using Microsoft.Extensions.Logging.Console;
 using Microsoft.Extensions.Configuration;
+using System.IO;
+using System.Collections.Concurrent;
 
 namespace MagBot.Services
 {
@@ -40,6 +42,17 @@ namespace MagBot.Services
         private ILoggerFactory ConfigureLogging(ILoggerFactory factory)
         {
             factory.AddConsole(_config.GetSection("Logging"));
+            factory.AddProvider(new FileLoggerProvider(new FileLoggerConfig
+            {
+                LogLevel = LogLevel.Error,
+                FilePath = Environment.CurrentDirectory + @"\errorlog.txt"
+            }));
+            factory.AddProvider(new FileLoggerProvider(new FileLoggerConfig
+            {
+                LogLevel = LogLevel.Debug,
+                FilePath = Environment.CurrentDirectory + @"\debuglog.txt"
+            }));
+
             return factory;
         }
 
@@ -75,5 +88,71 @@ namespace MagBot.Services
         private static LogLevel LogLevelFromSeverity(LogSeverity severity)
             => (LogLevel)(Math.Abs((int)severity - 5));
 
+    }
+
+    public class FileLoggerConfig
+    {
+        public LogLevel LogLevel { get; set; } = LogLevel.Warning;
+        public int EventId { get; set; } = 0;
+        public string FilePath { get; set; } = Environment.CurrentDirectory + @"\logfile.txt";
+    }
+
+    public class FileLogger : ILogger
+    {
+        private readonly string _name;
+        private readonly FileLoggerConfig _config;
+
+        public FileLogger(string name, FileLoggerConfig config)
+        {
+            _name = name;
+            _config = config;
+        }
+
+        public IDisposable BeginScope<TState>(TState state)
+        {
+            return null;
+        }
+
+        public bool IsEnabled(LogLevel logLevel)
+        {
+            return logLevel == _config.LogLevel;
+        }
+
+        public void Log<TState>(LogLevel logLevel, EventId eventId, TState state, Exception exception, Func<TState, Exception, string> formatter)
+        {
+            if (!IsEnabled(logLevel))
+            {
+                return;
+            }
+
+            if (_config.EventId == 0 || _config.EventId == eventId.Id)
+            {
+                using (StreamWriter writer = new StreamWriter(_config.FilePath, true))
+                {
+                    writer.WriteLine($"{logLevel.ToString()}: {_name}[{eventId.Id}] at {DateTime.Now}\n{formatter(state, exception)}\n");
+                }
+            }
+        }
+    }
+
+    public class FileLoggerProvider : ILoggerProvider
+    {
+        private readonly FileLoggerConfig _config;
+        private readonly ConcurrentDictionary<string, FileLogger> _loggers = new ConcurrentDictionary<string, FileLogger>();
+
+        public FileLoggerProvider(FileLoggerConfig config)
+        {
+            _config = config;
+        }
+
+        public ILogger CreateLogger(string categoryName)
+        {
+            return _loggers.GetOrAdd(categoryName, name => new FileLogger(name, _config));
+        }
+
+        public void Dispose()
+        {
+            _loggers.Clear();
+        }
     }
 }
