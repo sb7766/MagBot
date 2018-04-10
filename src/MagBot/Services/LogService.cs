@@ -128,7 +128,7 @@ namespace MagBot.Services
 
             if (_config.EventId == 0 || _config.EventId == eventId.Id)
             {
-                if (!File.Exists(_config.FilePath)) File.Create(_config.FilePath);
+                if (!File.Exists(_config.FilePath)) File.Create(_config.FilePath).Close();
                 using (StreamWriter writer = new StreamWriter(_config.FilePath, true))
                 {
                     writer.WriteLine($"{logLevel.ToString()}: {_name}[{eventId.Id}] at {DateTime.Now}\n{formatter(state, exception)}\n");

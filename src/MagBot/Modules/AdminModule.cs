@@ -27,6 +27,13 @@ namespace MagBot.Modules
             _config = config;
         }
 
+        [Command("throwerror")]
+        [Summary("Throw an error. For testing only.")]
+        public Task ThrowError()
+        {
+            throw new Exception("This is an error. This should show up.");
+        }
+
         [Command("setgame")]
         [Summary("Sets the bot's game.")]
         public async Task SetGame([Remainder] string game)
