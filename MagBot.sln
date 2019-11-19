@@ -1,13 +1,13 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 15
-VisualStudioVersion = 15.0.26621.2
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.29503.13
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{102BA110-B18D-475A-B798-52484018E1E8}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{411A4CCD-0D20-40E9-BC35-95584D0E6F08}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MagBot", "src\MagBot\MagBot.csproj", "{F92DF99D-6266-4CEF-95E4-6C760CCF9278}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MagBot", "src\MagBot\MagBot.csproj", "{F92DF99D-6266-4CEF-95E4-6C760CCF9278}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

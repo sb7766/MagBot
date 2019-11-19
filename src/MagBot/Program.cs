@@ -8,10 +8,10 @@ using MagBot.DatabaseContexts;
 using Microsoft.Extensions.DependencyInjection;
 using MagBot.Services;
 using Microsoft.Extensions.Configuration;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using System.Threading;
 using Discord.Addons.Interactive;
+using Microsoft.EntityFrameworkCore;
 
 namespace MagBot
 {
@@ -104,7 +104,7 @@ namespace MagBot
                 .AddSingleton<ClientConfigService>()
                 .AddSingleton<ConsoleCommandService>()
                 .AddEntityFrameworkNpgsql()
-                .AddDbContext<GuildDataContext>(options => options.UseNpgsql(_config.GetConnectionString("Sunburst")))
+                .AddDbContext<GuildDataContext>(options => options.UseNpgsql(_config.GetConnectionString("Sunburst"), o => o.SetPostgresVersion(9,6)))
                 .BuildServiceProvider();
         }
 

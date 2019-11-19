@@ -201,5 +201,207 @@ namespace MagBot.Modules
             }
         }
 
+        [Group("selfrole")]
+        [Name("Self Role")]
+        [RequireUserPermission(GuildPermission.ManageRoles)]
+        public class SelfRoleModule : ModuleBase
+        {
+            private readonly GuildDataContext _sunburstdb;
+
+            public SelfRoleModule(GuildDataContext sunburstdb)
+            {
+                _sunburstdb = sunburstdb;
+            }
+
+            [Command("add")]
+            [Summary("Adds a self-assignable role. Role must exist.")]
+            public async Task SelfRoleAdd([Remainder] string rolename)
+            {
+                IRole Role = Context.Guild.Roles.FirstOrDefault(r => r.Name.ToLower() == rolename.ToLower());
+
+                if (Role != null)
+                {
+                    var guild = await _sunburstdb.Guilds.FirstOrDefaultAsync(g => g.DiscordId == Context.Guild.Id);
+
+                    await _sunburstdb.Entry(guild).Collection(g => g.SelfAssignedRoles).LoadAsync();
+
+                    var selfrole = guild.SelfAssignedRoles.FirstOrDefault(r => r.RoleId == Role.Id);
+
+                    if (selfrole == null)  
+                    {
+                        selfrole = new SelfAssignedRole
+                        {
+                            RoleId = Role.Id,
+                            Name = Role.Name
+                        };
+                        guild.SelfAssignedRoles.Add(selfrole);
+                        await _sunburstdb.SaveChangesAsync();
+                        await ReplyAsync($"Role \"{Role.Name}\" was made self-assignable.");
+                    }
+                    else
+                    {
+                        await ReplyAsync("Role already self-assignable.");
+                    }
+                } 
+                else
+                {
+                    await ReplyAsync("Role does not exist.");
+                }
+            }
+
+            [Command("remove")]
+            [Summary("Removes a self-assignable role. Role must exist and be self-assignable.")]
+            public async Task SelfRoleRemove([Remainder] string rolename)
+            {
+                IRole Role = Context.Guild.Roles.FirstOrDefault(r => r.Name.ToLower() == rolename.ToLower());
+
+                if (Role != null)
+                {
+                    var guild = await _sunburstdb.Guilds.FirstOrDefaultAsync(g => g.DiscordId == Context.Guild.Id);
+
+                    await _sunburstdb.Entry(guild).Collection(g => g.SelfAssignedRoles).LoadAsync();
+
+                    var selfrole = guild.SelfAssignedRoles.FirstOrDefault(r => r.RoleId == Role.Id);
+
+                    if (selfrole != null)
+                    {
+                        guild.SelfAssignedRoles.Remove(selfrole);
+                        await _sunburstdb.SaveChangesAsync();
+                        await ReplyAsync($"Role \"{Role.Name}\" was made not self-assignable.");
+                    }
+                    else
+                    {
+                        await ReplyAsync("Role already not self-assignable.");
+                    }
+                }
+                else
+                {
+                    await ReplyAsync("Role does not exist.");
+                }
+            }
+
+            [Command("clear")]
+            [Summary("Clears all self-assigned roles.")]
+            public async Task SelfRoleClear()
+            {
+                var guild = await _sunburstdb.Guilds.FirstOrDefaultAsync(g => g.DiscordId == Context.Guild.Id);
+                await _sunburstdb.Entry(guild).Collection(g => g.SelfAssignedRoles).LoadAsync();
+                guild.SelfAssignedRoles.Clear();
+                await _sunburstdb.SaveChangesAsync();
+
+                await ReplyAsync("All self-assignable roles cleared.");
+            }
+
+            [Command("list")]
+            [Summary("Lists all self-assigned roles.")]
+            public async Task SelfRoleList()
+            {
+                var guild = await _sunburstdb.Guilds.FirstOrDefaultAsync(g => g.DiscordId == Context.Guild.Id);
+
+                await _sunburstdb.Entry(guild).Collection(g => g.SelfAssignedRoles).LoadAsync();
+
+                string response = "Here are the self-assignable roles in this server:\n";
+
+                foreach (var sr in guild.SelfAssignedRoles)
+                {
+                    response += $"-{sr.Name} (ID: {sr.RoleId})\n";
+                }
+
+                await ReplyAsync(response);
+            }
+        }
+
+        [Command("iam")]
+        [Summary("Gives you a self-assignable role.")]
+        public async Task IAm([Remainder] string rolename)
+        {
+            var guild = await _sunburstdb.Guilds.FirstOrDefaultAsync(g => g.DiscordId == Context.Guild.Id);
+
+            await _sunburstdb.Entry(guild).Collection(g => g.SelfAssignedRoles).LoadAsync();
+
+            var selfrole = guild.SelfAssignedRoles.FirstOrDefault(r => r.Name.ToLower() == rolename.ToLower());
+            
+            if (selfrole != null) {
+                IRole role = Context.Guild.GetRole(selfrole.RoleId);
+                
+                if (role != null)
+                {
+                    var user = await Context.Guild.GetUserAsync(Context.User.Id);
+                    if (user.RoleIds.Contains(role.Id))
+                    {
+                        await ReplyAsync("You already have that role!");
+                    }
+                    else
+                    {
+                        await user.AddRoleAsync(role);
+                        await ReplyAsync($"You are now \"{role.Name}\".");
+                    }
+                }
+                else
+                {
+                    await ReplyAsync("Role not found in server but is listed as self-assignable, please contact a server admin.");
+                }
+            }
+            else
+            {
+                await ReplyAsync("Role not self-assignable.");
+            }
+        }
+
+        [Command("iamnot")]
+        [Summary("Removes a self-assignable role from you.")]
+        public async Task IAmNot([Remainder] string rolename)
+        {
+            var guild = await _sunburstdb.Guilds.FirstOrDefaultAsync(g => g.DiscordId == Context.Guild.Id);
+
+            await _sunburstdb.Entry(guild).Collection(g => g.SelfAssignedRoles).LoadAsync();
+
+            var selfrole = guild.SelfAssignedRoles.FirstOrDefault(r => r.Name.ToLower() == rolename.ToLower());
+
+            if (selfrole != null)
+            {
+                IRole role = Context.Guild.GetRole(selfrole.RoleId);
+
+                if (role != null)
+                {
+                    var user = await Context.Guild.GetUserAsync(Context.User.Id);
+                    if (!user.RoleIds.Contains(role.Id))
+                    {
+                        await ReplyAsync("You don't have that role!");
+                    }
+                    else
+                    {
+                        await user.RemoveRoleAsync(role);
+                        await ReplyAsync($"You are no longer \"{role.Name}\".");
+                    }
+                }
+                else
+                {
+                    await ReplyAsync("Role not found in server but is listed as self-assignable, please contact a server admin.");
+                }
+            }
+            else
+            {
+                await ReplyAsync("Role not self-assignable.");
+            }
+        }
+
+        [Command("selfroles")]
+        [Summary("Lists available selfroles.")]
+        public async Task SelfrolesList()
+        {
+            var guild = await _sunburstdb.Guilds.FirstOrDefaultAsync(g => g.DiscordId == Context.Guild.Id);
+
+            await _sunburstdb.Entry(guild).Collection(g => g.SelfAssignedRoles).LoadAsync();
+
+            string response = "Here are the self-assignable roles in this server:\n";
+
+            foreach (var sr in guild.SelfAssignedRoles)
+            {
+                response += $"-{sr.Name}\n";
+            }
+
+            await ReplyAsync(response);
+        }
     }
 }

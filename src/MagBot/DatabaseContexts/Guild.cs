@@ -27,5 +27,6 @@ namespace MagBot.DatabaseContexts
 
         public List<TagList> TagLists { get; set; }
         public List<Raffle> Raffles { get; set; }
+        public List<SelfAssignedRole> SelfAssignedRoles { get; set; }
     }
 }
