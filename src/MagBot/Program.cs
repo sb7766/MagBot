@@ -8,7 +8,6 @@ using MagBot.DatabaseContexts;
 using Microsoft.Extensions.DependencyInjection;
 using MagBot.Services;
 using Microsoft.Extensions.Configuration;
-using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using System.Threading;
@@ -24,6 +23,7 @@ namespace MagBot
 
         private DiscordSocketClient _client;
         private IConfiguration _config;
+        private Timer reconTimer;
 
         public async Task Start()
         {
@@ -51,22 +51,35 @@ namespace MagBot
             
             _client.GuildAvailable += (async (g) =>
             {
-                var db = services.GetRequiredService<GuildDataContext>();
-
-                var guild = await db.Guilds.FirstOrDefaultAsync(gu => gu.DiscordId == g.Id);
-
-                if (guild == null)
+                using (var scope = services.CreateScope())
                 {
-                    guild = new Guild
+                    var db = scope.ServiceProvider.GetRequiredService<GuildDataContext>();
+
+                    //var db = services.GetRequiredService<GuildDataContext>();
+
+                    var guild = await db.Guilds.FirstOrDefaultAsync(gu => gu.DiscordId == g.Id);
+
+                    if (guild == null)
                     {
-                        DiscordId = g.Id
-                    };
+                        guild = new Guild
+                        {
+                            DiscordId = g.Id
+                        };
 
-                    db.Guilds.Add(guild);
+                        await db.Guilds.AddAsync(guild);
+                    }
+
+                    await db.SaveChangesAsync();
                 }
-
-                await db.SaveChangesAsync();
             });
+
+            reconTimer = new Timer(async (e) =>
+            {
+                if (_client.ConnectionState == ConnectionState.Disconnected)
+                {
+                    await _client.StartAsync();
+                }
+            }, null, TimeSpan.FromMinutes(10), TimeSpan.FromMinutes(10));
 
             await Task.Delay(-1);
         }
@@ -82,12 +95,15 @@ namespace MagBot
                 // Raffles
                 .AddSingleton<RaffleService>()
                 // Logging
-                .AddLogging()
+                .AddLogging(builder => builder
+                .AddConsole()
+                .AddConfiguration(_config.GetSection("Logging")))
                 .AddSingleton<LogService>()
                 // Extra
                 .AddSingleton(_config)
                 .AddSingleton<ClientConfigService>()
                 .AddSingleton<ConsoleCommandService>()
+                .AddEntityFrameworkNpgsql()
                 .AddDbContext<GuildDataContext>(options => options.UseNpgsql(_config.GetConnectionString("Sunburst")))
                 .BuildServiceProvider();
         }

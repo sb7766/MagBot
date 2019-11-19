@@ -41,12 +41,12 @@ namespace MagBot.Services
 
         private ILoggerFactory ConfigureLogging(ILoggerFactory factory)
         {
-            factory.AddConsole(_config.GetSection("Logging"));
             factory.AddProvider(new FileLoggerProvider(new FileLoggerConfig
             {
                 LogLevel = LogLevel.Error,
                 FilePath = Environment.CurrentDirectory + "/errorlog.txt"
             }));
+
             if (_config["logDebug"] == "true")
             factory.AddProvider(new FileLoggerProvider(new FileLoggerConfig
             {

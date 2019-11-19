@@ -27,7 +27,7 @@ namespace MagBot.Services
 
         public async void Shutdown()
         {
-            await _discord.SetStatusAsync(UserStatus.Offline);
+            await _discord.SetStatusAsync(UserStatus.Invisible);
             await _discord.StopAsync();
             await _discord.LogoutAsync();
             Environment.Exit(0);

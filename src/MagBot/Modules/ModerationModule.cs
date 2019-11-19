@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 using Discord.Commands;
 using MagBot.DatabaseContexts;
 using Discord.Addons.Interactive;
-using Microsoft.EntityFrameworkCore;
+//using Microsoft.EntityFrameworkCore;
 using System.Linq;
 using static MagBot.Extensions;
 using Discord;

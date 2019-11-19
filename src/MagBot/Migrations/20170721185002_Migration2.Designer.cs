@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Migrations;
 using MagBot.DatabaseContexts;
+using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 namespace MagBot.Migrations
 {

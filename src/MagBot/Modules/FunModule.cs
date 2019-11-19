@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 using Discord.Commands;
 using MagBot.DatabaseContexts;
 using System.Diagnostics;
-using Microsoft.EntityFrameworkCore;
+//using Microsoft.EntityFrameworkCore;
 
 namespace MagBot.Modules
 {
@@ -50,7 +50,7 @@ namespace MagBot.Modules
                         return;
                     }
                 }
-
+                
                 await ReplyAsync($"No tags found for **{keyword}**");
             }
 

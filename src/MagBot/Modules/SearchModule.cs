@@ -35,7 +35,7 @@ namespace MagBot.Modules
 
             if ((Context.Channel as ITextChannel).IsNsfw)
             {
-                search = $"https://derpibooru.org/search.json?q={tags}&sf=random&filter_id=56027";
+                search = $"https://derpibooru.org/search.json?q={tags}&sf=random&filter_id=164554";
             }
             else
             {
@@ -52,7 +52,7 @@ namespace MagBot.Modules
             string search = "";
             if ((Context.Channel as ITextChannel).IsNsfw)
             {
-                search = $"https://derpibooru.org/search.json?q=*&sf=random&filter_id=56027";
+                search = $"https://derpibooru.org/search.json?q=*&sf=random&filter_id=164554";
             }
             else
             {
@@ -168,15 +168,13 @@ namespace MagBot.Modules
 
         [Command("e621")]
         [Summary("Fetch a random image from e621 for the given tags. If no tags are given, a completely random image is returned. " +
-            "Will only return NSFW results in a channel marked as NSFW. Maximum of 4 tags in a SFW channel and 5 in a NSFW channel.")]
+            "Will only return NSFW results in a channel marked as NSFW. Maximum of 4 tags.")]
         public async Task E621([Remainder] string tags)
         {
-            // explicit https://derpibooru.org/search.json?q=&sf=random&filter_id=56027
-            // safe https://derpibooru.org/search.json?q=&sf=random&filter_id=100073
             string search = "";
             if ((Context.Channel as ITextChannel).IsNsfw)
             {
-                search = $"https://e621.net/post/index.json?tags=order:random+{tags}&limit=5";
+                search = $"https://e621.net/post/index.json?tags=order:random+-cub+{tags}&limit=5";
             }
             else
             {
@@ -193,7 +191,7 @@ namespace MagBot.Modules
             string search = "";
             if ((Context.Channel as ITextChannel).IsNsfw)
             {
-                search = $"https://e621.net/post/index.json?tags=order:random&limit=5";
+                search = $"https://e621.net/post/index.json?tags=order:random+-cub&limit=5";
             }
             else
             {
