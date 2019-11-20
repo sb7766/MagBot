@@ -41,11 +41,18 @@ namespace MagBot.Services
             if (!(rawMessage is SocketUserMessage message)) return;
             if (message.Source != MessageSource.User) return;
 
-            int argPos = 0;
-            if (!message.HasStringPrefix(_config["commandPrefix"], ref argPos)) return;
-
             var context = new SocketCommandContext(_discord, message);
-            var result = await _commands.ExecuteAsync(context, argPos, _provider);
+            IResult result;
+            if (message.Content.StartsWith("??"))
+            {
+                result = await _commands.ExecuteAsync(context, $"tag {message.Content.Substring(2)}", _provider);
+            }
+            else
+            {
+                int argPos = 0;
+                if (!message.HasStringPrefix(_config["commandPrefix"], ref argPos)) return;
+                result = await _commands.ExecuteAsync(context, argPos, _provider);
+            }
 
             if (result.Error.HasValue &&
                 result.Error.Value != CommandError.UnknownCommand)

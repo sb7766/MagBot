@@ -27,7 +27,7 @@ namespace MagBot.Modules
             [Command("")]
             [Alias("query")]
             [Priority(1)]
-            [Summary("Gets all tags for the specified keyword.")]
+            [Summary("Gets all tags for the specified keyword. Can also use ?? to query a tag (i.e. ??discord is the same as st!tag discord).")]
             public async Task TagQuery(string keyword)
             {
                 keyword = keyword.ToLower();

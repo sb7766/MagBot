@@ -57,7 +57,7 @@ namespace MagBot
 
                     //var db = services.GetRequiredService<GuildDataContext>();
 
-                    var guild = await db.Guilds.FirstOrDefaultAsync(gu => gu.DiscordId == g.Id);
+                    var guild = await db.Guilds.FirstOrDefaultAsync(gu => gu.DiscordIdLong == (long)g.Id);
 
                     if (guild == null)
                     {
@@ -104,7 +104,7 @@ namespace MagBot
                 .AddSingleton<ClientConfigService>()
                 .AddSingleton<ConsoleCommandService>()
                 .AddEntityFrameworkNpgsql()
-                .AddDbContext<GuildDataContext>(options => options.UseNpgsql(_config.GetConnectionString("Sunburst"), o => o.SetPostgresVersion(9,6)))
+                .AddDbContext<GuildDataContext>(options => options.UseNpgsql(_config.GetConnectionString("Sunburst"), o => o.SetPostgresVersion(9, 6)), ServiceLifetime.Transient)
                 .BuildServiceProvider();
         }
 
