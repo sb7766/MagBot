@@ -32,7 +32,7 @@ namespace MagBot.Modules
             {
                 keyword = keyword.ToLower();
 
-                var guild = await _sunburstdb.Guilds.FirstOrDefaultAsync(g => g.DiscordId == Context.Guild.Id);
+                var guild = await _sunburstdb.Guilds.FirstOrDefaultAsync(g => g.DiscordIdLong == (long)Context.Guild.Id);
 
                 await _sunburstdb.Entry(guild).Collection(g => g.TagLists).LoadAsync();
 
@@ -95,7 +95,7 @@ namespace MagBot.Modules
             {
                 keyword = keyword.ToLower();
 
-                var guild = await _sunburstdb.Guilds.FirstOrDefaultAsync(g => g.DiscordId == Context.Guild.Id);
+                var guild = await _sunburstdb.Guilds.FirstOrDefaultAsync(g => g.DiscordIdLong == (long)Context.Guild.Id);
 
                 await _sunburstdb.Entry(guild).Collection(g => g.TagLists).LoadAsync();
 

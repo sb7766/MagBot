@@ -42,7 +42,7 @@ namespace MagBot.Modules
                 var user = Context.User;
                 await Context.Message.DeleteAsync();
 
-                var guild = await _sunburstdb.Guilds.FirstOrDefaultAsync(g => g.DiscordId == Context.Guild.Id);
+                var guild = await _sunburstdb.Guilds.FirstOrDefaultAsync(g => g.DiscordIdLong == (long)Context.Guild.Id);
                 var dm = await user.GetOrCreateDMChannelAsync();
 
                 if (guild.ReportingEnabled)
@@ -98,7 +98,7 @@ namespace MagBot.Modules
             [RequireUserPermission(GuildPermission.ManageGuild)]
             public async Task ReportEnable()
             {
-                var guild = await _sunburstdb.Guilds.FirstOrDefaultAsync(g => g.DiscordId == Context.Guild.Id);
+                var guild = await _sunburstdb.Guilds.FirstOrDefaultAsync(g => g.DiscordIdLong == (long)Context.Guild.Id);
 
                 var msg = await ReplyAsync("```md\n# Setting up reporting. Please mention the role you would like reports sent to:\n" +
                     "Type 'cancel' to stop setup.```");
@@ -186,7 +186,7 @@ namespace MagBot.Modules
             [RequireUserPermission(GuildPermission.ManageGuild)]
             public async Task ReportDisable()
             {
-                var guild = await _sunburstdb.Guilds.FirstOrDefaultAsync(g => g.DiscordId == Context.Guild.Id);
+                var guild = await _sunburstdb.Guilds.FirstOrDefaultAsync(g => g.DiscordIdLong == (long)Context.Guild.Id);
 
                 if (guild.ReportingEnabled)
                 {
@@ -202,7 +202,7 @@ namespace MagBot.Modules
         }
 
         [Group("selfrole")]
-        [Name("Self Role")]
+        [Name("SelfRole")]
         [RequireUserPermission(GuildPermission.ManageRoles)]
         public class SelfRoleModule : ModuleBase
         {
@@ -221,7 +221,7 @@ namespace MagBot.Modules
 
                 if (Role != null)
                 {
-                    var guild = await _sunburstdb.Guilds.FirstOrDefaultAsync(g => g.DiscordId == Context.Guild.Id);
+                    var guild = await _sunburstdb.Guilds.FirstOrDefaultAsync(g => g.DiscordIdLong == (long)Context.Guild.Id);
 
                     await _sunburstdb.Entry(guild).Collection(g => g.SelfAssignedRoles).LoadAsync();
 
@@ -257,7 +257,7 @@ namespace MagBot.Modules
 
                 if (Role != null)
                 {
-                    var guild = await _sunburstdb.Guilds.FirstOrDefaultAsync(g => g.DiscordId == Context.Guild.Id);
+                    var guild = await _sunburstdb.Guilds.FirstOrDefaultAsync(g => g.DiscordIdLong == (long)Context.Guild.Id);
 
                     await _sunburstdb.Entry(guild).Collection(g => g.SelfAssignedRoles).LoadAsync();
 
@@ -284,7 +284,7 @@ namespace MagBot.Modules
             [Summary("Clears all self-assigned roles.")]
             public async Task SelfRoleClear()
             {
-                var guild = await _sunburstdb.Guilds.FirstOrDefaultAsync(g => g.DiscordId == Context.Guild.Id);
+                var guild = await _sunburstdb.Guilds.FirstOrDefaultAsync(g => g.DiscordIdLong == (long)Context.Guild.Id);
                 await _sunburstdb.Entry(guild).Collection(g => g.SelfAssignedRoles).LoadAsync();
                 guild.SelfAssignedRoles.Clear();
                 await _sunburstdb.SaveChangesAsync();
@@ -296,7 +296,7 @@ namespace MagBot.Modules
             [Summary("Lists all self-assigned roles.")]
             public async Task SelfRoleList()
             {
-                var guild = await _sunburstdb.Guilds.FirstOrDefaultAsync(g => g.DiscordId == Context.Guild.Id);
+                var guild = await _sunburstdb.Guilds.FirstOrDefaultAsync(g => g.DiscordIdLong == (long)Context.Guild.Id);
 
                 await _sunburstdb.Entry(guild).Collection(g => g.SelfAssignedRoles).LoadAsync();
 
@@ -315,7 +315,7 @@ namespace MagBot.Modules
         [Summary("Gives you a self-assignable role.")]
         public async Task IAm([Remainder] string rolename)
         {
-            var guild = await _sunburstdb.Guilds.FirstOrDefaultAsync(g => g.DiscordId == Context.Guild.Id);
+            var guild = await _sunburstdb.Guilds.FirstOrDefaultAsync(g => g.DiscordIdLong == (long)Context.Guild.Id);
 
             await _sunburstdb.Entry(guild).Collection(g => g.SelfAssignedRoles).LoadAsync();
 
@@ -352,7 +352,7 @@ namespace MagBot.Modules
         [Summary("Removes a self-assignable role from you.")]
         public async Task IAmNot([Remainder] string rolename)
         {
-            var guild = await _sunburstdb.Guilds.FirstOrDefaultAsync(g => g.DiscordId == Context.Guild.Id);
+            var guild = await _sunburstdb.Guilds.FirstOrDefaultAsync(g => g.DiscordIdLong == (long)Context.Guild.Id);
 
             await _sunburstdb.Entry(guild).Collection(g => g.SelfAssignedRoles).LoadAsync();
 
@@ -390,7 +390,7 @@ namespace MagBot.Modules
         [Summary("Lists available selfroles.")]
         public async Task SelfrolesList()
         {
-            var guild = await _sunburstdb.Guilds.FirstOrDefaultAsync(g => g.DiscordId == Context.Guild.Id);
+            var guild = await _sunburstdb.Guilds.FirstOrDefaultAsync(g => g.DiscordIdLong == (long)Context.Guild.Id);
 
             await _sunburstdb.Entry(guild).Collection(g => g.SelfAssignedRoles).LoadAsync();
 

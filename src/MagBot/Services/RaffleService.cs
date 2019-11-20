@@ -129,7 +129,7 @@ namespace MagBot.Services
             };
 
             // Add the raffle to the database along with the details about its creation
-            var guild = _sunburstdb.Guilds.FirstOrDefault(g => g.DiscordId == context.Guild.Id);
+            var guild = _sunburstdb.Guilds.FirstOrDefault(g => g.DiscordIdLong == (long)context.Guild.Id);
             await _sunburstdb.Entry(guild).Collection(g => g.Raffles).LoadAsync();
             var raffles = guild.Raffles;
             
@@ -184,7 +184,7 @@ namespace MagBot.Services
         // Allow the raffle owner to cancel their raffle manually
         public async Task Cancel(ICommandContext context, int id)
         {
-            var guild = _sunburstdb.Guilds.FirstOrDefault(g => g.DiscordId == context.Guild.Id);
+            var guild = _sunburstdb.Guilds.FirstOrDefault(g => g.DiscordIdLong == (long)context.Guild.Id);
             await _sunburstdb.Entry(guild).Collection(g => g.Raffles).LoadAsync();
             var raffle = guild.Raffles.FirstOrDefault(r => r.Id == id);
 
@@ -228,7 +228,7 @@ namespace MagBot.Services
         // Get the current config for a given raffle and package it into an embed
         public async Task ConfigGet(ICommandContext context, int id)
         {
-            var guild = _sunburstdb.Guilds.FirstOrDefault(g => g.DiscordId == context.Guild.Id);
+            var guild = _sunburstdb.Guilds.FirstOrDefault(g => g.DiscordIdLong == (long)context.Guild.Id);
             await _sunburstdb.Entry(guild).Collection(g => g.Raffles).LoadAsync();
             var raffle = guild.Raffles.FirstOrDefault(r => r.Id == id);
 
@@ -288,7 +288,7 @@ namespace MagBot.Services
         // Set the prize for a raffle
         public async Task ConfigPrize(ICommandContext context, int id, string prize)
         {
-            var guild = _sunburstdb.Guilds.FirstOrDefault(g => g.DiscordId == context.Guild.Id);
+            var guild = _sunburstdb.Guilds.FirstOrDefault(g => g.DiscordIdLong == (long)context.Guild.Id);
             await _sunburstdb.Entry(guild).Collection(g => g.Raffles).LoadAsync();
             var raffle = guild.Raffles.FirstOrDefault(r => r.Id == id);
 
@@ -307,7 +307,7 @@ namespace MagBot.Services
         // Set the number of winners for a raffle
         public async Task ConfigWinners(ICommandContext context, int id, int winners)
         {
-            var guild = _sunburstdb.Guilds.FirstOrDefault(g => g.DiscordId == context.Guild.Id);
+            var guild = _sunburstdb.Guilds.FirstOrDefault(g => g.DiscordIdLong == (long)context.Guild.Id);
             await _sunburstdb.Entry(guild).Collection(g => g.Raffles).LoadAsync();
             var raffle = guild.Raffles.FirstOrDefault(r => r.Id == id);
 
@@ -328,7 +328,7 @@ namespace MagBot.Services
         {
             TimeSpan parsedLength = await ParseLength(length);
 
-            var guild = _sunburstdb.Guilds.FirstOrDefault(g => g.DiscordId == context.Guild.Id);
+            var guild = _sunburstdb.Guilds.FirstOrDefault(g => g.DiscordIdLong == (long)context.Guild.Id);
             await _sunburstdb.Entry(guild).Collection(g => g.Raffles).LoadAsync();
             var raffle = guild.Raffles.FirstOrDefault(r => r.Id == id);
 
@@ -353,7 +353,7 @@ namespace MagBot.Services
                 throw new Exception("Role does not exist.");
             }
 
-            var guild = _sunburstdb.Guilds.FirstOrDefault(g => g.DiscordId == context.Guild.Id);
+            var guild = _sunburstdb.Guilds.FirstOrDefault(g => g.DiscordIdLong == (long)context.Guild.Id);
             await _sunburstdb.Entry(guild).Collection(g => g.Raffles).LoadAsync();
             var raffle = guild.Raffles.FirstOrDefault(r => r.Id == id);
 
@@ -380,7 +380,7 @@ namespace MagBot.Services
                 throw new Exception("User does not exist.");
             }
 
-            var guild = _sunburstdb.Guilds.FirstOrDefault(g => g.DiscordId == context.Guild.Id);
+            var guild = _sunburstdb.Guilds.FirstOrDefault(g => g.DiscordIdLong == (long)context.Guild.Id);
             await _sunburstdb.Entry(guild).Collection(g => g.Raffles).LoadAsync();
             var raffle = guild.Raffles.FirstOrDefault(r => r.Id == id);
 
@@ -414,7 +414,7 @@ namespace MagBot.Services
                 throw new Exception("User does not exist.");
             }
 
-            var guild = _sunburstdb.Guilds.FirstOrDefault(g => g.DiscordId == context.Guild.Id);
+            var guild = _sunburstdb.Guilds.FirstOrDefault(g => g.DiscordIdLong == (long)context.Guild.Id);
             await _sunburstdb.Entry(guild).Collection(g => g.Raffles).LoadAsync();
             var raffle = guild.Raffles.FirstOrDefault(r => r.Id == id);
 
@@ -442,7 +442,7 @@ namespace MagBot.Services
         // Clear a raffle's blacklist
         public async Task ConfigBlacklistClear(ICommandContext context, int id)
         {
-            var guild = _sunburstdb.Guilds.FirstOrDefault(g => g.DiscordId == context.Guild.Id);
+            var guild = _sunburstdb.Guilds.FirstOrDefault(g => g.DiscordIdLong == (long)context.Guild.Id);
             await _sunburstdb.Entry(guild).Collection(g => g.Raffles).LoadAsync();
             var raffle = guild.Raffles.FirstOrDefault(r => r.Id == id);
 
@@ -461,7 +461,7 @@ namespace MagBot.Services
         // Sets a raffle as started
         public async Task Start(ICommandContext context, int id)
         {
-            var guild = _sunburstdb.Guilds.FirstOrDefault(g => g.DiscordId == context.Guild.Id);
+            var guild = _sunburstdb.Guilds.FirstOrDefault(g => g.DiscordIdLong == (long)context.Guild.Id);
             await _sunburstdb.Entry(guild).Collection(g => g.Raffles).LoadAsync();
             var raffle = guild.Raffles.FirstOrDefault(r => r.Id == id);
 
@@ -493,7 +493,7 @@ namespace MagBot.Services
         // Allow the raffle owner to end a raffle before the end time
         public async Task End(ICommandContext context, int id, bool noDraw)
         {
-            var guild = _sunburstdb.Guilds.FirstOrDefault(g => g.DiscordId == context.Guild.Id);
+            var guild = _sunburstdb.Guilds.FirstOrDefault(g => g.DiscordIdLong == (long)context.Guild.Id);
             await _sunburstdb.Entry(guild).Collection(g => g.Raffles).LoadAsync();
             var raffle = guild.Raffles.FirstOrDefault(r => r.Id == id);
 
@@ -527,7 +527,7 @@ namespace MagBot.Services
         // Enter a user into the raffle
         public async Task Enter(ICommandContext context, int id)
         {
-            var guild = _sunburstdb.Guilds.FirstOrDefault(g => g.DiscordId == context.Guild.Id);
+            var guild = _sunburstdb.Guilds.FirstOrDefault(g => g.DiscordIdLong == (long)context.Guild.Id);
             await _sunburstdb.Entry(guild).Collection(g => g.Raffles).LoadAsync();
             var raffle = guild.Raffles.FirstOrDefault(r => r.Id == id);
 
@@ -576,7 +576,7 @@ namespace MagBot.Services
         // Remove a user from the raffle
         public async Task Leave(ICommandContext context, int id)
         {
-            var guild = _sunburstdb.Guilds.FirstOrDefault(g => g.DiscordId == context.Guild.Id);
+            var guild = _sunburstdb.Guilds.FirstOrDefault(g => g.DiscordIdLong == (long)context.Guild.Id);
             await _sunburstdb.Entry(guild).Collection(g => g.Raffles).LoadAsync();
             var raffle = guild.Raffles.FirstOrDefault(r => r.Id == id);
 
@@ -611,7 +611,7 @@ namespace MagBot.Services
         // List the raffles in a server
         public async Task List(ICommandContext context)
         {
-            var guild = _sunburstdb.Guilds.FirstOrDefault(g => g.DiscordId == context.Guild.Id);
+            var guild = _sunburstdb.Guilds.FirstOrDefault(g => g.DiscordIdLong == (long)context.Guild.Id);
             await _sunburstdb.Entry(guild).Collection(g => g.Raffles).LoadAsync();
             var raffles = guild.Raffles;
 
@@ -650,7 +650,7 @@ namespace MagBot.Services
         // Get detailed info on a raffle
         public async Task Info(ICommandContext context, int id)
         {
-            var guild = _sunburstdb.Guilds.FirstOrDefault(g => g.DiscordId == context.Guild.Id);
+            var guild = _sunburstdb.Guilds.FirstOrDefault(g => g.DiscordIdLong == (long)context.Guild.Id);
             await _sunburstdb.Entry(guild).Collection(g => g.Raffles).LoadAsync();
             var raffle = guild.Raffles.FirstOrDefault(r => r.Id == id);
 
