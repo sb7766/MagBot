@@ -221,5 +221,68 @@ namespace MagBot.Modules
             await ownerchannel.SendMessageAsync($"Mag-Bot has left server {Context.Guild.Name} ({Context.Guild.Id})");
             await Context.Guild.LeaveAsync();
         }
+
+        [Command("userinfo")]
+        [Summary("Gets the info about a user. Defaults to self.")]
+        [RequireContext(ContextType.Guild)]
+        public async Task UserInfo([Optional] string user)
+        {
+            IGuildUser guildUser = null;
+            
+            if (Context.Message.MentionedUserIds.Count > 0)
+            {
+                guildUser = await Context.Guild.GetUserAsync(Context.Message.MentionedUserIds.FirstOrDefault());
+            }
+            else if (user == null)
+            {
+                guildUser = await Context.Guild.GetUserAsync(Context.User.Id);
+            }
+            else
+            {
+                var users = await Context.Guild.GetUsersAsync();
+                guildUser = users.FirstOrDefault(u => u.Nickname?.ToLower() == user.ToLower());
+
+                if (guildUser == null)
+                {
+                    guildUser = users.FirstOrDefault(u => u.Username.ToLower() == user.ToLower());
+
+                    if (guildUser == null)
+                    {
+                        ulong uid;
+                        ulong.TryParse(user, out uid);
+
+                        guildUser = await Context.Guild.GetUserAsync(uid);
+                    }
+                }
+            }
+
+            if (guildUser != null)
+            {
+                string roles = "";
+                foreach (var roleid in guildUser.RoleIds) 
+                {
+                    var role = Context.Guild.GetRole(roleid);
+                    if (role == Context.Guild.EveryoneRole) continue;
+                    roles += $"{role.Name}, ";
+                }
+                roles = roles.Length == 0 ? "None" : roles.Remove(roles.Length - 2);
+
+                var embed = new EmbedBuilder();
+                embed.WithThumbnailUrl(guildUser.GetAvatarUrl())
+                    .WithTitle($"User Info for {guildUser.Username}#{guildUser.Discriminator}")
+                    .WithDescription($"ID: {guildUser.Id}")
+                    .WithColor(Color.LightOrange)
+                    .AddField("Nickname", guildUser.Nickname ?? "None", true)
+                    .AddField("Account Created", guildUser.CreatedAt, true)
+                    .AddField("Joined Server", guildUser.JoinedAt, true)
+                    .AddField($"Roles [{guildUser.RoleIds.Count - 1}]", roles, true);
+
+                await ReplyAsync(null, false, embed.Build());
+            }
+            else
+            {
+                await ReplyAsync("User not found in this server.");
+            }
+        }
     }
 }
