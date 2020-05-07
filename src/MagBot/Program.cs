@@ -104,7 +104,7 @@ namespace MagBot
                 .AddSingleton<ClientConfigService>()
                 .AddSingleton<ConsoleCommandService>()
                 .AddEntityFrameworkNpgsql()
-                .AddDbContext<GuildDataContext>(options => options.UseNpgsql(_config.GetConnectionString("Sunburst"), o => o.SetPostgresVersion(9, 6)), ServiceLifetime.Transient)
+                .AddDbContext<GuildDataContext>(options => options.UseNpgsql(_config.GetConnectionString("Sunburst")), ServiceLifetime.Transient)
                 .BuildServiceProvider();
         }
 

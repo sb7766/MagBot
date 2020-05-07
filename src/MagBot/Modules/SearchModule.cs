@@ -35,11 +35,11 @@ namespace MagBot.Modules
 
             if ((Context.Channel as ITextChannel).IsNsfw)
             {
-                search = $"https://derpibooru.org/search.json?q={tags}&sf=random&filter_id=164554";
+                search = $"https://derpibooru.org/api/v1/json/search/images?q={tags}&sf=random&filter_id=164554";
             }
             else
             {
-                search = $"https://derpibooru.org/search.json?q={tags}&sf=random&filter_id=100073";
+                search = $"https://derpibooru.org/api/v1/json/search/images?q={tags}&sf=random&filter_id=100073";
             }
             var result = await GetDerpiEmbedAsync(search);
             if (result.Item2 != null) await ReplyAsync($"Here you go, {Context.User.Mention}!", false, result.Item2);
@@ -52,11 +52,11 @@ namespace MagBot.Modules
             string search = "";
             if ((Context.Channel as ITextChannel).IsNsfw)
             {
-                search = $"https://derpibooru.org/search.json?q=*&sf=random&filter_id=164554";
+                search = $"https://derpibooru.org/api/v1/json/search/images?q=*&sf=random&filter_id=164554";
             }
             else
             {
-                search = $"https://derpibooru.org/search.json?q=*&sf=random&filter_id=100073";
+                search = $"https://derpibooru.org/api/v1/json/search/images?q=*&sf=random&filter_id=100073";
             }
             var result = await GetDerpiEmbedAsync(search);
             if (result.Item2 != null) await ReplyAsync($"Here you go, {Context.User.Mention}!", false, result.Item2);
@@ -65,21 +65,23 @@ namespace MagBot.Modules
 
         private async Task<Tuple<string, Embed>> GetDerpiEmbedAsync(string searchUrl)
         {
-            var jsonString = await new HttpClient().GetStringAsync(searchUrl);
+            var http = new HttpClient();
+            http.DefaultRequestHeaders.Add("User-Agent", "Sunburst/Beta (by Magmatic#2220 on Discord)");
+            var jsonString = await http.GetStringAsync(searchUrl);
             var json = JObject.Parse(jsonString);
-            if (json["total"] == null || json.Value<int>("total") == 0)
+            if (json == null || json.Value<int>("total") == 0)
             {
                 return new Tuple<string, Embed>($"No results found. Sorry, {Context.User.Mention}!", null);
             }
-            var searchResult = json["search"][0];
+            var searchResult = json["images"][0];
 
             EmbedBuilder embed = new EmbedBuilder
             {
                 Color = new Color(61, 146, 208),
                 Title = $"ID: {searchResult["id"]}",
                 Url = $"https://derpibooru.org/{searchResult["id"]}",
-                Description = $"Uploaded by {searchResult["uploader"]}",
-                ThumbnailUrl = $"https:{searchResult["representations"]["thumb_small"]}"
+                //Description = $"Uploaded by {searchResult["uploader"]}",
+                ThumbnailUrl = searchResult["representations"].Value<string>("thumb_small")
             };
 
             //string tags = searchResult.Value<string>("tags");
@@ -89,8 +91,7 @@ namespace MagBot.Modules
                 //.AddField("Tags", tags);
 
 
-            string imageUrl = $"https:{searchResult.Value<string>("image")}";
-            imageUrl = $"{imageUrl.Remove(imageUrl.IndexOf("__"))}.{searchResult["original_format"]}";
+            string imageUrl = searchResult["representations"].Value<string>("full");
 
             return new Tuple<string, Embed>(imageUrl, embed.Build());
         }
@@ -174,11 +175,11 @@ namespace MagBot.Modules
             string search = "";
             if ((Context.Channel as ITextChannel).IsNsfw)
             {
-                search = $"https://e621.net/post/index.json?tags=order:random+-cub+{tags}&limit=5";
+                search = $"https://e621.net/posts.json?tags=order:random+-cub+{tags}&limit=5";
             }
             else
             {
-                search = $"https://e621.net/post/index.json?tags=order:random+rating:s+{tags}&limit=5";
+                search = $"https://e621.net/posts.json?tags=order:random+rating:s+{tags}&limit=5";
             }
             var result = await GetE621EmbedAsync(search);
             if (result.Item2 != null) await ReplyAsync($"Here you go, {Context.User.Mention}!", false, result.Item2);
@@ -191,11 +192,11 @@ namespace MagBot.Modules
             string search = "";
             if ((Context.Channel as ITextChannel).IsNsfw)
             {
-                search = $"https://e621.net/post/index.json?tags=order:random+-cub&limit=5";
+                search = $"https://e621.net/posts.json?tags=order:random+-cub&limit=5";
             }
             else
             {
-                search = $"https://e621.net/post/index.json?tags=order:random+rating:s&limit=5";
+                search = $"https://e621.net/posts.json?tags=order:random+rating:s&limit=5";
             }
             var result = await GetE621EmbedAsync(search);
             if (result.Item2 != null) await ReplyAsync($"Here you go, {Context.User.Mention}!", false, result.Item2);
@@ -207,30 +208,30 @@ namespace MagBot.Modules
             var http = new HttpClient();
             http.DefaultRequestHeaders.Add("User-Agent", "Sunburst/Beta (by Magmatic#2220 on Discord)");
             var jsonString = await http.GetStringAsync(searchUrl);
-            var json = JArray.Parse(jsonString);
-            if (json == null || json.Count == 0)
+            var json = JObject.Parse(jsonString);
+            if (json == null || !json["posts"].HasValues)
             {
                 return new Tuple<string, Embed>($"No results found. Sorry, {Context.User.Mention}!", null);
             }
-            var searchResult = json[0];
+            var searchResult = json["posts"][0];
 
             EmbedBuilder embed = new EmbedBuilder
             {
                 Color = new Color(61, 146, 208),
                 Title = $"ID: {searchResult["id"]}",
                 Url = $"https://e621.net/post/show/{searchResult["id"]}",
-                Description = $"Uploaded by {searchResult["author"]}",
-                ThumbnailUrl = searchResult.Value<string>("preview_url")
+                //Description = $"Uploaded by {searchResult["author"]}",
+                ThumbnailUrl = searchResult["preview"].Value<string>("url")
             };
 
             //string tags = searchResult.Value<string>("tags");
             //if (tags.Length > 1024) tags = tags.Remove(1023);
-            embed.AddField("Score", searchResult["score"], true)
+            embed.AddField("Score", searchResult["score"]["total"], true)
                 .AddField("Faves", searchResult["fav_count"], true);
                 //.AddField("Tags", tags);
 
 
-            string imageUrl = searchResult.Value<string>("file_url");
+            string imageUrl = searchResult["file"].Value<string>("url");
 
             return new Tuple<string, Embed>(imageUrl, embed.Build());
         }

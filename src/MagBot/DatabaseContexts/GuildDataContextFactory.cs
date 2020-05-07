@@ -29,7 +29,7 @@ namespace MagBot.DatabaseContexts
             }
             else throw new Exception("Invalid environment. SUNBURST_ENV must be Development or Migration.");
 ;
-            optionsBuilder.UseNpgsql(connection, o => o.SetPostgresVersion(9, 6));
+            optionsBuilder.UseNpgsql(connection);
 
             return new GuildDataContext(optionsBuilder.Options);
         }
